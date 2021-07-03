@@ -21,5 +21,15 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: Build with Maven
+    - uses: jorelali/setup-elm@v3
+      with:
+        elm-version: 0.19.1
+    - working-directory: ./
+      name: Complie and generate code
+      run: mvn -U clean compile
+    - working-directory: ./public
+      name: Build Elm app
+      run: elm make src/Main.elm --output=web/main.js
+    - working-directory: ./
+      name: Build with Maven
       run: mvn -B package --file pom.xml

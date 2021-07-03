@@ -5,7 +5,7 @@ import functionalj.types.elm.Elm;
 
 public class PersonService {
     
-    @Elm(baseModule = "", generatedDirectory = "public/src/")
+    @Elm(baseModule = "", generatedDirectory = "elm/src/")
     @Struct
     void Person(String firstName, String lastName) {}
     

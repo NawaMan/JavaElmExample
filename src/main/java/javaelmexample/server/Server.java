@@ -118,7 +118,7 @@ public class Server {
         var contentType   = extContentTypes.get(pathExtension);
         addHeader(exchange, "Content-Type",  contentType);
         
-        var resource = Server.class.getClassLoader().getResourceAsStream("out/" + path);
+        var resource = Server.class.getClassLoader().getResourceAsStream("./" + path);
         if (resource != null) {
             var buffer = new ByteArrayOutputStream();
             resource.transferTo(buffer);
