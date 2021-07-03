@@ -1,4 +1,4 @@
-package javaelm.server;
+package javaelmexample.server;
 
 import static functionalj.list.FuncList.listOf;
 import static functionalj.map.FuncMap.newMap;

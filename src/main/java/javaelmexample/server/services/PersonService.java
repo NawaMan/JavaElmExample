@@ -1,4 +1,4 @@
-package javaelm.server.services;
+package javaelmexample.server.services;
 
 import functionalj.types.Struct;
 import functionalj.types.elm.Elm;

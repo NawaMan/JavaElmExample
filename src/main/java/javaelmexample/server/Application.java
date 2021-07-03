@@ -1,4 +1,4 @@
-package javaelm.server;
+package javaelmexample.server;
 
 public class Application {
     
