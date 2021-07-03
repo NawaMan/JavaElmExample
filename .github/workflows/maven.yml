@@ -27,7 +27,7 @@ jobs:
     - working-directory: ./
       name: Complie and generate code
       run: mvn -U clean compile
-    - working-directory: ./public
+    - working-directory: ./elm
       name: Build Elm app
       run: elm make src/Main.elm --output=web/main.js
     - working-directory: ./
