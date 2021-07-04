@@ -20,7 +20,7 @@ main =
 type Model
   = Loading
   | Failure
-  | Success Person
+  | Success (List Person)
 
 
 init : () -> (Model, Cmd Msg)
@@ -29,13 +29,13 @@ init _ =
 
 
 type Msg
-  = LoadPerson (Result Http.Error Person)
+  = LoadPersons (Result Http.Error (List Person))
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    LoadPerson result ->
+    LoadPersons result ->
       case result of
         Ok url ->
           (Success url, Cmd.none)
@@ -60,12 +60,12 @@ view : Model -> Html Msg
 view model =
   div []
     [ h2 [] [ text "Persons" ]
-    , viewPerson model
+    , viewPersons model
     ]
 
 
-viewPerson : Model -> Html Msg
-viewPerson model =
+viewPersons : Model -> Html Msg
+viewPersons model =
   case model of
     Failure ->
       div []
@@ -74,11 +74,22 @@ viewPerson model =
     Loading ->
       text "Loading..."
 
-    Success person ->
-      div []
-        [ text "I got a person: "
-        , text person.firstName
-        ]
+    Success persons ->
+      div [ class "persons" ]
+          [ ul []
+            (persons
+              |> List.map (\person -> viewPerson person)
+            )
+          ]
+
+
+viewPerson : Person -> Html Msg
+viewPerson person = 
+  div [ class "person" ]
+  [ text person.firstName
+  , text " "
+  , text person.lastName
+  ]
 
 
 
@@ -88,6 +99,6 @@ viewPerson model =
 loadPersons : Cmd Msg
 loadPersons =
   Http.get
-    { url = "data/person.json"
-    , expect = Http.expectJson LoadPerson personDecoder
+    { url = "data/persons.json"
+    , expect = Http.expectJson LoadPersons personListDecoder
     }
