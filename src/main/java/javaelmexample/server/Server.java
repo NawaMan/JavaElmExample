@@ -17,7 +17,6 @@ import java.util.function.Supplier;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
 
 public class Server {
     
@@ -40,56 +39,47 @@ public class Server {
     
     private final ExecutorService executor;
     private final int             portNumber;
+    private final String          basePath;
+    
+    private final Runnable waitForKeyPress = () -> {
+        System.out.println("Press 'ENTER' to exit ...");
+        try (var scanner = new Scanner(System.in)) { scanner.nextLine(); }
+    };
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
-    
+
     public Server(int portNumber) {
-        this(portNumber, null);
+        this(portNumber, null, null);
     }
-    public Server(int portNumber, ExecutorService executor) {
+    public Server(int portNumber, String basePath) {
+        this(portNumber, basePath, null);
+    }
+    public Server(int portNumber, String basePath, ExecutorService executor) {
+        this.basePath   = nullable(basePath).orElse   ("/");
         this.executor   = nullable(executor).orElseGet(defaultExecutor);
         this.portNumber = portNumber;
     }
     
     public void start() throws IOException {
-        var httpServer = createHttpServer(portNumber);
-        httpServer.createContext("/", this::handle);
+        var address    = new InetSocketAddress("0.0.0.0", portNumber);
+        var httpServer = HttpServer.create(address, 0);
         httpServer.setExecutor(executor);
+        httpServer.createContext(basePath, this::handle);
         
         try {
             httpServer.start();
-            
-//            if ((args != null) && (args.length != 0) && args[0].equals("--infinite")) {
-//                System.out.println("Touch 'control.file' to stop the server ...");
-//                var controlFile = new File("control.file");
-//                var lastModified = controlFile.exists() ? controlFile.lastModified() : -1;
-//                while (lastModified == (controlFile.exists() ? controlFile.lastModified() : -1)) {
-//                    Thread.sleep(10000);
-//                }
-//            } else {
-                System.out.println("Press 'ENTER' to exit ...");
-                try (var scanner = new Scanner(System.in)) { scanner.nextLine(); }
-//            }
-            
+            waitForKeyPress.run();
             System.out.println("Shutting down ...");
         } catch (Exception exception) {
             exception.printStackTrace();
-            // TODO - Figure out how to do this without exit.
-            System.exit(1);
         } finally {
             stillRunning.set(false);
-            shutdown(httpServer, null);
+            shutdown(httpServer);
             executor.shutdown();
         }
     }
     
-    private HttpServer createHttpServer(int port) throws IOException {
-        var address = new InetSocketAddress("0.0.0.0", port);
-        var httpServer = HttpServer.create(address, 0);
-        return httpServer;
-    }
-    
-    private void shutdown(HttpServer httpServer, HttpsServer httpsServer) {
+    private void shutdown(HttpServer httpServer) {
         new Thread(()->{
             httpServer.stop(1);
             System.out.println("HTTP Server is successfully stopped.");
@@ -98,8 +88,8 @@ public class Server {
     
     private void handle(HttpExchange exchange) throws IOException {
         var path = exchange.getRequestURI().getPath();
-        if (path.isEmpty() || path.equals("/")) {
-            path = "index.html";
+        if (path.isEmpty() || path.equals(basePath)) {
+            path = basePath + "index.html";
         }
         
         if (path.contains("/api/")) {
@@ -133,8 +123,7 @@ public class Server {
         responseHttp(exchange, 200, null, contentBytes);
     }
     
-    private void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) 
-                    throws IOException {
+    private void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) throws IOException {
         try {
             addHeader(exchange, "Cache-Control", "no-cache");
             addHeader(exchange, "Content-Type",  contentType);
@@ -153,6 +142,11 @@ public class Server {
         if (!values.isEmpty()) {
             exchange.getResponseHeaders().put(headerName, values);
         }
+    }
+    
+    public static void main(String[] args) throws Exception {
+        var server = new Server(8081);
+        server.start();
     }
     
 }
