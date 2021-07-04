@@ -86,7 +86,9 @@ viewPersons model =
 viewPerson : Person -> Html Msg
 viewPerson person = 
   div [ class "person" ]
-  [ text person.firstName
+  [ span [class "remove-person"] 
+         [text " x "]
+  , text person.firstName
   , text " "
   , text person.lastName
   ]
@@ -99,6 +101,6 @@ viewPerson person =
 loadPersons : Cmd Msg
 loadPersons =
   Http.get
-    { url = "data/persons.json"
+    { url = "/api/persons"
     , expect = Http.expectJson LoadPersons personListDecoder
     }

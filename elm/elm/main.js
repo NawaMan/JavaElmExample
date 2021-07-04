@@ -6134,7 +6134,7 @@ var $author$project$Person$personListDecoder = $elm$json$Json$Decode$list($autho
 var $author$project$Main$loadPersons = $elm$http$Http$get(
 	{
 		ax: A2($elm$http$Http$expectJson, $elm$core$Basics$identity, $author$project$Person$personListDecoder),
-		aS: '/api/persons'
+		aS: 'data/persons.json'
 	});
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$loadPersons);
@@ -6176,7 +6176,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewPerson = function (person) {
 	return A2(
 		$elm$html$Html$div,
@@ -6186,16 +6185,6 @@ var $author$project$Main$viewPerson = function (person) {
 			]),
 		_List_fromArray(
 			[
-				A2(
-				$elm$html$Html$span,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('remove-person')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(' x ')
-					])),
 				$elm$html$Html$text(person.az),
 				$elm$html$Html$text(' '),
 				$elm$html$Html$text(person.aD)

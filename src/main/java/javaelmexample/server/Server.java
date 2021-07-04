@@ -15,13 +15,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+
+import javaelmexample.server.services.Person;
+import javaelmexample.server.services.PersonService;
 
 public class Server {
     
     private static final Supplier<? extends ExecutorService> defaultExecutor = Executors::newCachedThreadPool;
-    private static final byte[]                              emptyBytes      = new byte[0];
     
     private static final Map<String, String> extContentTypes = newMap(String.class, String.class)
                     .with(".icon", "image/x-icon")
@@ -47,7 +50,9 @@ public class Server {
     };
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
-
+    
+    private PersonService personalService = null;
+    
     public Server(int portNumber) {
         this(portNumber, null, null);
     }
@@ -68,6 +73,9 @@ public class Server {
         
         try {
             httpServer.start();
+            
+            personalService = PersonService.create("data/persons.json");
+            
             waitForKeyPress.run();
             System.out.println("Shutting down ...");
         } catch (Exception exception) {
@@ -100,7 +108,53 @@ public class Server {
     }
     
     private void handleApi(String path, HttpExchange exchange) throws IOException {
-        responseHttp(exchange, "{}");
+        if (exchange.getRequestMethod().equals("GET")) {
+            if (path.matches("^/api/persons/?$")) {
+                var persons     = personalService.get().toList();
+                var result      = new Gson().toJson(persons);
+                var contentType = extContentTypes.get(".json");
+                responseHttp(exchange, 200, contentType, result.getBytes());
+                return;
+            }
+            if (path.matches("^/api/persons/[^/]+$")) {
+                var personId    = path.replaceAll("^(/api/persons/)([^/]+)$", "$2");
+                var person      = personalService.get(personId);
+                if (person.isEmpty()) {
+                    responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
+                } else {
+                    var result      = new Gson().toJson(person.get());
+                    var contentType = extContentTypes.get(".json");
+                    responseHttp(exchange, 200, contentType, result.getBytes());
+                }
+                return;
+            }
+        }
+        if (exchange.getRequestMethod().equals("POST")) {
+            if (path.matches("^/api/persons/?$")) {
+                var buffer = new ByteArrayOutputStream();
+                exchange.getRequestBody().transferTo(buffer);
+                var content     = new String(buffer.toByteArray());
+                var inPerson    = new Gson().fromJson(content, Person.class);
+                var outPerson   = personalService.post(inPerson);
+                var outContent  = new Gson().toJson(outPerson);
+                var contentType = extContentTypes.get(".json");
+                responseHttp(exchange, 200, contentType, outContent.getBytes());
+                return;
+            }
+        }
+        if (exchange.getRequestMethod().equals("DELETE")) {
+            if (path.matches("^/api/persons/[^/]+$")) {
+                var personId    = path.replaceAll("^(/api/persons/)([^/]+)$", "$2");
+                var person      = personalService.delete(personId);
+                if (person.isEmpty()) {
+                    responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
+                } else {
+                    exchange.sendResponseHeaders(204, -1);
+                }
+                return;
+            }
+        }
+        responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
     }
     
     private void handleFile(String path, HttpExchange exchange) throws IOException {
@@ -116,11 +170,6 @@ public class Server {
         } else {
             responseHttp(exchange, 404, null, ("File not found: " + path).getBytes());
         }
-    }
-    
-    private void responseHttp(HttpExchange exchange, String contentBody) throws IOException {
-        var contentBytes = nullable(contentBody).map(String::getBytes).orElse(emptyBytes);
-        responseHttp(exchange, 200, null, contentBytes);
     }
     
     private void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) throws IOException {
