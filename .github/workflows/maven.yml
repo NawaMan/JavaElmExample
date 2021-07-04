@@ -31,7 +31,7 @@ jobs:
       run:  mvn -U clean compile
     
     - name: Build Elm app
-      run:  elm make ./elm/src/Main.elm --output=./elm/web/main.js
+      run:  cd elm ; elm make ./elm/src/Main.elm --output=./elm/web/main.js ; cd ..
     
     - name: Build with Maven
       run:  mvn -B package --file pom.xml

@@ -42,7 +42,7 @@ public class Server {
     private final int             portNumber;
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
-
+    
     public Server(int portNumber) {
         this(portNumber, null);
     }
