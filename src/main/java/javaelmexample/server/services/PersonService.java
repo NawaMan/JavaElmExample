@@ -23,7 +23,7 @@ public class PersonService implements Service<Person> {
     
     @Elm(baseModule = "", generatedDirectory = "elm/src/")
     @Struct
-    void Person(@Nullable String id, String firstName, String lastName) {}
+    void Person(@Nullable String id, String firstName, String lastName, @Nullable String nickName) {}
     
     private static final Random rand = new Random();
     

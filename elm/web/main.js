@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aC,
-		impl.aR,
-		impl.aO,
+		impl.aE,
+		impl.aT,
+		impl.aQ,
 		function() { return function() {} }
 	);
 });
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aC,
-		impl.aR,
-		impl.aO,
+		impl.aE,
+		impl.aT,
+		impl.aQ,
 		function(sendToApp, initialModel) {
-			var view = impl.aT;
+			var view = impl.aU;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aC,
-		impl.aR,
-		impl.aO,
+		impl.aE,
+		impl.aT,
+		impl.aQ,
 		function(sendToApp, initialModel) {
 			var divertHrefToApp = impl.H && impl.H(sendToApp)
-			var view = impl.aT;
+			var view = impl.aU;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3977,12 +3977,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.at);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.ax);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.aQ) && (_VirtualDom_doc.title = title = doc.aQ);
+				(title !== doc.aS) && (_VirtualDom_doc.title = title = doc.aS);
 			});
 		}
 	);
@@ -4038,8 +4038,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aG;
-	var onUrlRequest = impl.aH;
+	var onUrlChange = impl.aI;
+	var onUrlRequest = impl.aJ;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4059,9 +4059,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.ab === next.ab
-							&& curr.S === next.S
-							&& curr.Z.a === next.Z.a
+							&& curr.ae === next.ae
+							&& curr.U === next.U
+							&& curr.ab.a === next.ab.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aC: function(flags)
+		aE: function(flags)
 		{
-			return A3(impl.aC, flags, _Browser_getUrl(), key);
+			return A3(impl.aE, flags, _Browser_getUrl(), key);
 		},
+		aU: impl.aU,
 		aT: impl.aT,
-		aR: impl.aR,
-		aO: impl.aO
+		aQ: impl.aQ
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aA: 'hidden', au: 'visibilitychange' }
+		? { aC: 'hidden', ay: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aA: 'mozHidden', au: 'mozvisibilitychange' }
+		? { aC: 'mozHidden', ay: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aA: 'msHidden', au: 'msvisibilitychange' }
+		? { aC: 'msHidden', ay: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aA: 'webkitHidden', au: 'webkitvisibilitychange' }
-		: { aA: 'hidden', au: 'visibilitychange' };
+		? { aC: 'webkitHidden', ay: 'webkitvisibilitychange' }
+		: { aC: 'hidden', ay: 'visibilitychange' };
 }
 
 
@@ -4232,12 +4232,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		ah: _Browser_getScene(),
-		am: {
-			ao: _Browser_window.pageXOffset,
-			ap: _Browser_window.pageYOffset,
-			an: _Browser_doc.documentElement.clientWidth,
-			R: _Browser_doc.documentElement.clientHeight
+		ak: _Browser_getScene(),
+		aq: {
+			as: _Browser_window.pageXOffset,
+			at: _Browser_window.pageYOffset,
+			ar: _Browser_doc.documentElement.clientWidth,
+			T: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		an: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		R: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		ar: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		T: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4271,15 +4271,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			ah: {
-				an: node.scrollWidth,
-				R: node.scrollHeight
+			ak: {
+				ar: node.scrollWidth,
+				T: node.scrollHeight
 			},
-			am: {
-				ao: node.scrollLeft,
-				ap: node.scrollTop,
-				an: node.clientWidth,
-				R: node.clientHeight
+			aq: {
+				as: node.scrollLeft,
+				at: node.scrollTop,
+				ar: node.clientWidth,
+				T: node.clientHeight
 			}
 		};
 	});
@@ -4309,18 +4309,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			ah: _Browser_getScene(),
-			am: {
-				ao: x,
-				ap: y,
-				an: _Browser_doc.documentElement.clientWidth,
-				R: _Browser_doc.documentElement.clientHeight
+			ak: _Browser_getScene(),
+			aq: {
+				as: x,
+				at: y,
+				ar: _Browser_doc.documentElement.clientWidth,
+				T: _Browser_doc.documentElement.clientHeight
 			},
-			aw: {
-				ao: x + rect.left,
-				ap: y + rect.top,
-				an: rect.width,
-				R: rect.height
+			aA: {
+				as: x + rect.left,
+				at: y + rect.top,
+				ar: rect.width,
+				T: rect.height
 			}
 		};
 	});
@@ -4365,25 +4365,25 @@ var _Http_toTask = F3(function(router, toTask, request)
 	return _Scheduler_binding(function(callback)
 	{
 		function done(response) {
-			callback(toTask(request.ax.a(response)));
+			callback(toTask(request.P.a(response)));
 		}
 
 		var xhr = new XMLHttpRequest();
 		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
 		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
-		xhr.addEventListener('load', function() { done(_Http_toResponse(request.ax.b, xhr)); });
-		$elm$core$Maybe$isJust(request.al) && _Http_track(router, xhr, request.al.a);
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.P.b, xhr)); });
+		$elm$core$Maybe$isJust(request.ao) && _Http_track(router, xhr, request.ao.a);
 
 		try {
-			xhr.open(request.aE, request.aS, true);
+			xhr.open(request.aF, request.ap, true);
 		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.aS));
+			return done($elm$http$Http$BadUrl_(request.ap));
 		}
 
 		_Http_configureRequest(xhr, request);
 
-		request.at.a && xhr.setRequestHeader('Content-Type', request.at.a);
-		xhr.send(request.at.b);
+		request.ax.a && xhr.setRequestHeader('Content-Type', request.ax.a);
+		xhr.send(request.ax.b);
 
 		return function() { xhr.c = true; xhr.abort(); };
 	});
@@ -4394,13 +4394,13 @@ var _Http_toTask = F3(function(router, toTask, request)
 
 function _Http_configureRequest(xhr, request)
 {
-	for (var headers = request.Q; headers.b; headers = headers.b) // WHILE_CONS
+	for (var headers = request.S; headers.b; headers = headers.b) // WHILE_CONS
 	{
 		xhr.setRequestHeader(headers.a.a, headers.a.b);
 	}
-	xhr.timeout = request.aP.a || 0;
-	xhr.responseType = request.ax.d;
-	xhr.withCredentials = request.ar;
+	xhr.timeout = request.aR.a || 0;
+	xhr.responseType = request.P.d;
+	xhr.withCredentials = request.av;
 }
 
 
@@ -4421,10 +4421,10 @@ function _Http_toResponse(toBody, xhr)
 function _Http_toMetadata(xhr)
 {
 	return {
-		aS: xhr.responseURL,
-		aM: xhr.status,
-		aN: xhr.statusText,
-		Q: _Http_parseHeaders(xhr.getAllResponseHeaders())
+		ap: xhr.responseURL,
+		aO: xhr.status,
+		aP: xhr.statusText,
+		S: _Http_parseHeaders(xhr.getAllResponseHeaders())
 	};
 }
 
@@ -4519,15 +4519,15 @@ function _Http_track(router, xhr, tracker)
 	xhr.upload.addEventListener('progress', function(event) {
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
-			aL: event.loaded,
-			ai: event.total
+			aN: event.loaded,
+			al: event.total
 		}))));
 	});
 	xhr.addEventListener('progress', function(event) {
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
-			aJ: event.loaded,
-			ai: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+			aL: event.loaded,
+			al: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
 }var $elm$core$Basics$EQ = 1;
@@ -5034,7 +5034,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {P: fragment, S: host, X: path, Z: port_, ab: protocol, ac: query};
+		return {R: fragment, U: host, _: path, ab: port_, ae: protocol, af: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5314,7 +5314,9 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$Loading = {$: 0};
-var $author$project$Main$LoadPersons = $elm$core$Basics$identity;
+var $author$project$Main$LoadPersons = function (a) {
+	return {$: 0, a: a};
+};
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -5907,7 +5909,7 @@ var $elm$http$Http$resolve = F2(
 			case 3:
 				var metadata = response.a;
 				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.aM));
+					$elm$http$Http$BadStatus(metadata.aO));
 			default:
 				var body = response.b;
 				return A2(
@@ -5935,7 +5937,7 @@ var $elm$http$Http$Request = function (a) {
 };
 var $elm$http$Http$State = F2(
 	function (reqs, subs) {
-		return {ae: reqs, aj: subs};
+		return {ah: reqs, am: subs};
 	});
 var $elm$http$Http$init = $elm$core$Task$succeed(
 	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
@@ -5979,7 +5981,7 @@ var $elm$http$Http$updateReqs = F3(
 					return A2(
 						$elm$core$Task$andThen,
 						function (pid) {
-							var _v4 = req.al;
+							var _v4 = req.ao;
 							if (_v4.$ === 1) {
 								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
 							} else {
@@ -6009,7 +6011,7 @@ var $elm$http$Http$onEffects = F4(
 				return $elm$core$Task$succeed(
 					A2($elm$http$Http$State, reqs, subs));
 			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.ae));
+			A3($elm$http$Http$updateReqs, router, cmds, state.ah));
 	});
 var $elm$core$List$maybeCons = F3(
 	function (f, mx, xs) {
@@ -6052,7 +6054,7 @@ var $elm$http$Http$onSelfMsg = F3(
 				A2(
 					$elm$core$List$filterMap,
 					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.aj)));
+					state.am)));
 	});
 var $elm$http$Http$Cancel = function (a) {
 	return {$: 0, a: a};
@@ -6066,14 +6068,14 @@ var $elm$http$Http$cmdMap = F2(
 			var r = cmd.a;
 			return $elm$http$Http$Request(
 				{
-					ar: r.ar,
-					at: r.at,
-					ax: A2(_Http_mapExpect, func, r.ax),
-					Q: r.Q,
-					aE: r.aE,
-					aP: r.aP,
-					al: r.al,
-					aS: r.aS
+					av: r.av,
+					ax: r.ax,
+					P: A2(_Http_mapExpect, func, r.P),
+					S: r.S,
+					aF: r.aF,
+					aR: r.aR,
+					ao: r.ao,
+					ap: r.ap
 				});
 		}
 	});
@@ -6096,16 +6098,16 @@ var $elm$http$Http$subscription = _Platform_leaf('Http');
 var $elm$http$Http$request = function (r) {
 	return $elm$http$Http$command(
 		$elm$http$Http$Request(
-			{ar: false, at: r.at, ax: r.ax, Q: r.Q, aE: r.aE, aP: r.aP, al: r.al, aS: r.aS}));
+			{av: false, ax: r.ax, P: r.P, S: r.S, aF: r.aF, aR: r.aR, ao: r.ao, ap: r.ap}));
 };
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
-		{at: $elm$http$Http$emptyBody, ax: r.ax, Q: _List_Nil, aE: 'GET', aP: $elm$core$Maybe$Nothing, al: $elm$core$Maybe$Nothing, aS: r.aS});
+		{ax: $elm$http$Http$emptyBody, P: r.P, S: _List_Nil, aF: 'GET', aR: $elm$core$Maybe$Nothing, ao: $elm$core$Maybe$Nothing, ap: r.ap});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Person$Person = F3(
-	function (id, firstName, lastName) {
-		return {az: firstName, T: id, aD: lastName};
+var $author$project$Person$Person = F4(
+	function (id, firstName, lastName, nickName) {
+		return {Q: firstName, V: id, X: lastName, aH: nickName};
 	});
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
@@ -6174,25 +6176,30 @@ var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 			decoder);
 	});
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Person$personDecoder = A3(
-	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'lastName',
-	$elm$json$Json$Decode$string,
+var $author$project$Person$personDecoder = A4(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+	'nickName',
+	$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
+	$elm$core$Maybe$Nothing,
 	A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'firstName',
+		'lastName',
 		$elm$json$Json$Decode$string,
-		A4(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'id',
-			$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
-			$elm$core$Maybe$Nothing,
-			$elm$json$Json$Decode$succeed($author$project$Person$Person))));
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'firstName',
+			$elm$json$Json$Decode$string,
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'id',
+				$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
+				$elm$core$Maybe$Nothing,
+				$elm$json$Json$Decode$succeed($author$project$Person$Person)))));
 var $author$project$Person$personListDecoder = $elm$json$Json$Decode$list($author$project$Person$personDecoder);
 var $author$project$Main$loadPersons = $elm$http$Http$get(
 	{
-		ax: A2($elm$http$Http$expectJson, $elm$core$Basics$identity, $author$project$Person$personListDecoder),
-		aS: '/api/persons'
+		P: A2($elm$http$Http$expectJson, $author$project$Main$LoadPersons, $author$project$Person$personListDecoder),
+		ap: '/api/persons'
 	});
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$loadPersons);
@@ -6206,24 +6213,73 @@ var $author$project$Main$Failure = {$: 1};
 var $author$project$Main$Success = function (a) {
 	return {$: 2, a: a};
 };
+var $author$project$Main$View = function (a) {
+	return {$: 3, a: a};
+};
+var $author$project$Main$LoadPerson = function (a) {
+	return {$: 1, a: a};
+};
+var $author$project$Main$loadPerson = function (id) {
+	return $elm$http$Http$get(
+		{
+			P: A2($elm$http$Http$expectJson, $author$project$Main$LoadPerson, $author$project$Person$personDecoder),
+			ap: '/api/persons/' + id
+		});
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var result = msg;
-		if (!result.$) {
-			var url = result.a;
-			return _Utils_Tuple2(
-				$author$project$Main$Success(url),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 0:
+				var result = msg.a;
+				if (!result.$) {
+					var persons = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Success(persons),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
+				}
+			case 1:
+				var result = msg.a;
+				if (!result.$) {
+					var person = result.a;
+					switch (model.$) {
+						case 0:
+							return _Utils_Tuple2(
+								$author$project$Main$View(
+									_Utils_Tuple2(_List_Nil, person)),
+								$elm$core$Platform$Cmd$none);
+						case 1:
+							return _Utils_Tuple2(
+								$author$project$Main$View(
+									_Utils_Tuple2(_List_Nil, person)),
+								$elm$core$Platform$Cmd$none);
+						case 2:
+							var persons = model.a;
+							return _Utils_Tuple2(
+								$author$project$Main$View(
+									_Utils_Tuple2(persons, person)),
+								$elm$core$Platform$Cmd$none);
+						default:
+							var _v4 = model.a;
+							var persons = _v4.a;
+							return _Utils_Tuple2(
+								$author$project$Main$View(
+									_Utils_Tuple2(persons, person)),
+								$elm$core$Platform$Cmd$none);
+					}
+				} else {
+					return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var id = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$loadPerson(id));
 		}
 	});
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6233,14 +6289,50 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$ShowPerson = function (a) {
+	return {$: 2, a: a};
+};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 0, a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $author$project$Main$viewPerson = function (person) {
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$viewEachPerson = function (person) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('person')
+				$elm$html$Html$Attributes$class('person'),
+				$elm$html$Html$Events$onClick(
+				$author$project$Main$ShowPerson(
+					A2($elm$core$Maybe$withDefault, '-', person.V)))
 			]),
 		_List_fromArray(
 			[
@@ -6254,11 +6346,136 @@ var $author$project$Main$viewPerson = function (person) {
 					[
 						$elm$html$Html$text(' x ')
 					])),
-				$elm$html$Html$text(person.az),
+				$elm$html$Html$text(person.Q),
 				$elm$html$Html$text(' '),
-				$elm$html$Html$text(person.aD)
+				$elm$html$Html$text(person.X)
 			]));
 };
+var $author$project$Main$viewPerson = F2(
+	function (persons, person) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('person')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$h2,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Persons')
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('persons')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$ul,
+									_List_Nil,
+									A2(
+										$elm$core$List$map,
+										function (p) {
+											return $author$project$Main$viewEachPerson(p);
+										},
+										persons))
+								]))
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('person-field')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('person-label')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('ID')
+								])),
+							$elm$html$Html$text(
+							A2($elm$core$Maybe$withDefault, '-', person.V))
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('person-field')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('person-label')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('First name')
+								])),
+							$elm$html$Html$text(person.Q)
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('person-field')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('person-label')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Last name')
+								])),
+							$elm$html$Html$text(person.X)
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('person-field')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('person-label')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Nick name')
+								])),
+							$elm$html$Html$text(
+							A2($elm$core$Maybe$withDefault, '<no-nick-name>', person.aH))
+						]))
+				]));
+	});
 var $author$project$Main$viewPersons = function (model) {
 	switch (model.$) {
 		case 1:
@@ -6271,45 +6488,50 @@ var $author$project$Main$viewPersons = function (model) {
 					]));
 		case 0:
 			return $elm$html$Html$text('Loading...');
-		default:
+		case 2:
 			var persons = model.a;
 			return A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('persons')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$ul,
-						_List_Nil,
-						A2(
-							$elm$core$List$map,
-							function (person) {
-								return $author$project$Main$viewPerson(person);
-							},
-							persons))
-					]));
-	}
-};
-var $author$project$Main$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h2,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Persons')
-					])),
-				$author$project$Main$viewPersons(model)
-			]));
+						A2(
+						$elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Persons')
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('persons')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$ul,
+								_List_Nil,
+								A2(
+									$elm$core$List$map,
+									function (person) {
+										return $author$project$Main$viewEachPerson(person);
+									},
+									persons))
+							]))
+					]));
+		default:
+			var _v1 = model.a;
+			var persons = _v1.a;
+			var person = _v1.b;
+			return A2($author$project$Main$viewPerson, persons, person);
+	}
+};
+var $author$project$Main$view = function (model) {
+	return $author$project$Main$viewPersons(model);
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{aC: $author$project$Main$init, aO: $author$project$Main$subscriptions, aR: $author$project$Main$update, aT: $author$project$Main$view});
+	{aE: $author$project$Main$init, aQ: $author$project$Main$subscriptions, aT: $author$project$Main$update, aU: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(0))(0)}});}(this));
