@@ -30,9 +30,11 @@ init _ =
 
 
 type Msg
-  = LoadPersons (Result Http.Error (List Person))
-  | LoadPerson  (Result Http.Error Person)
-  | ShowPerson  String
+  = LoadPersons  (Result Http.Error (List Person))
+  | LoadPerson   (Result Http.Error Person)
+  | ShowPerson   String
+  | DeletePerson String
+  | Deleted
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -63,6 +65,10 @@ update msg model =
           (Failure, Cmd.none)
     ShowPerson id ->
       (model, loadPerson id)
+    DeletePerson id ->
+      (Loading, deletePerson id)
+    Deleted ->
+      (Loading, loadPersons)
 
 
 
@@ -111,7 +117,9 @@ viewEachPerson person =
   div 
     [ class "person"
     , onClick (ShowPerson (Maybe.withDefault "-" person.id)) ]
-    [ span [class "remove-person"] 
+    [ span [ class "remove-person"
+           , onClick (DeletePerson (Maybe.withDefault "-" person.id))
+           ] 
            [text " x "]
     , text person.firstName
     , text " "
@@ -170,4 +178,16 @@ loadPerson id =
   Http.get
     { url = "/api/persons/" ++ id
     , expect = Http.expectJson LoadPerson personDecoder
+    }
+
+deletePerson : String -> (Cmd Msg)
+deletePerson id =
+  Http.request
+    { method = "DELETE"
+    , headers = []
+    , url = "/api/persons/" ++ id
+    , body = Http.emptyBody
+    , expect = Http.expectWhatever (\_ -> Deleted)
+    , timeout = Nothing
+    , tracker = Nothing
     }
