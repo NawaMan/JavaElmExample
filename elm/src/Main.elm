@@ -42,8 +42,7 @@ type Msg
   | LoadPerson   (Result Http.Error Person)
   | ShowPerson   String
   | DeletePerson String
-  | Deleted
-  | Added
+  | Reloaded
   | AddPerson    Person
   | ChangeFN     String
   | ChangeLN     String
@@ -72,14 +71,13 @@ update msg model =
 
         Err _ ->
           (Failure, Cmd.none)
+    
     ShowPerson id ->
       (model, loadPerson id)
+    
     DeletePerson id ->
       (model, deletePerson id)
-    Deleted ->
-      (model, loadPersons)
-    Added ->
-      (model, loadPersons)
+
     AddPerson person ->
       (model, addPerson person)
     ChangeFN firstName ->
@@ -100,6 +98,9 @@ update msg model =
           ((Display (Data data.persons Maybe.Nothing data.newPersonFirstName data.newPersonLastName nickName)), Cmd.none)
         _ ->
           (model, Cmd.none)
+
+    Reloaded ->
+      (model, loadPersons)
 
 
 -- SUBSCRIPTIONS
@@ -173,43 +174,34 @@ viewPersons model =
 
 viewEachPerson : Person -> Html Msg
 viewEachPerson person = 
-  div []
-      [ div 
-        [ class "person" ]
-        [ span [ class "remove-person"
-               , onClick (DeletePerson (Maybe.withDefault "-" person.id))
-               ] 
-               [text " x "]
-        , span [ onClick (ShowPerson (Maybe.withDefault "-" person.id))]
-               [ text person.firstName
-               , text " "
-               , text person.lastName
-               ]
-        ]
+  div [ class "person" ]
+      [ span [ class "remove-person"
+              , onClick (DeletePerson (Maybe.withDefault "-" person.id))
+              ] 
+              [text " x "]
+      , span [ onClick (ShowPerson (Maybe.withDefault "-" person.id))]
+              [ text (person.firstName ++ " " ++ person.lastName)
+              ]
       ]
 
 
 viewPerson : Person -> Html Msg
 viewPerson person = 
   div [ class "person" ]
-  [ div [ class "person-field" ]
-      [ span [class "person-label"] 
-             [text "ID"]
+  [ div [ class "person-id" ]
+      [ span [][text "ID"]
       , text (Maybe.withDefault "-" person.id)
       ]
-    , div [ class "person-field" ]
-      [ span [class "person-label"] 
-             [text "First name"]
+    , div [ class "person-first" ]
+      [ span [][text "First name"]
       , text person.firstName
       ]
-  , div [ class "person-field" ]
-      [ span [class "person-label"] 
-             [text "Last name"]
+  , div [ class "person-last" ]
+      [ span [][text "Last name"]
       , text person.lastName
       ]
-  , div [ class "person-field" ]
-      [ span [class "person-label"] 
-             [text "Nick name"]
+  , div [ class "person-nick" ]
+      [ span [][text "Nick name"]
       , text (Maybe.withDefault "<no-nick-name>" person.nickName)
       ]
   ]
@@ -241,7 +233,7 @@ deletePerson id =
     , headers = []
     , url = "/api/persons/" ++ id
     , body = Http.emptyBody
-    , expect = Http.expectWhatever (\_ -> Deleted)
+    , expect = Http.expectWhatever (\_ -> Reloaded)
     , timeout = Nothing
     , tracker = Nothing
     }
@@ -252,5 +244,5 @@ addPerson person =
   Http.post
     { url = "/api/persons/"
     , body = Http.jsonBody (personEncoder person)
-    , expect = Http.expectWhatever (\_ -> Added)
+    , expect = Http.expectWhatever (\_ -> Reloaded)
     }
