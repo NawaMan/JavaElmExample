@@ -44,6 +44,12 @@ null = Nothing
 stop : Cmd msg
 stop = Cmd.none
 
+wrap : Maybe String -> String
+wrap text =
+  case text of
+    Just t  -> " (" ++ t ++ ")"
+    Nothing -> ""
+
 changeField : Model -> Maybe String -> Maybe String -> Maybe String -> (Model, Cmd Msg)
 changeField model firstName lastName nickName = 
       case model of
@@ -109,7 +115,7 @@ viewEachPerson : Person -> Html Msg
 viewEachPerson person = 
   div [ class "person" ]
       [ span [ class "remove-person", onClick (DeletePerson (or "-" person.id))] [ text " x " ]
-      , span [ class "item-person",   onClick (ShowPerson   (or "-" person.id))] [ text (person.firstName ++ " " ++ person.lastName) ]
+      , span [ class "item-person",   onClick (ShowPerson   (or "-" person.id))] [ text (person.firstName ++ " " ++ person.lastName ++ (wrap person.nickName)) ]
       ]
 
 viewPerson : Person -> Html Msg

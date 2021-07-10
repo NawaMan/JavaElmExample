@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.P.D === region.V.D)
+	if (region.P.E === region.V.E)
 	{
-		return 'on line ' + region.P.D;
+		return 'on line ' + region.P.E;
 	}
-	return 'on lines ' + region.P.D + ' through ' + region.V.D;
+	return 'on lines ' + region.P.E + ' through ' + region.V.E;
 }
 
 
@@ -4375,9 +4375,9 @@ var _Http_toTask = F3(function(router, toTask, request)
 		$elm$core$Maybe$isJust(request.aU) && _Http_track(router, xhr, request.aU.a);
 
 		try {
-			xhr.open(request.aH, request.A, true);
+			xhr.open(request.aH, request.B, true);
 		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.A));
+			return done($elm$http$Http$BadUrl_(request.B));
 		}
 
 		_Http_configureRequest(xhr, request);
@@ -4421,7 +4421,7 @@ function _Http_toResponse(toBody, xhr)
 function _Http_toMetadata(xhr)
 {
 	return {
-		A: xhr.responseURL,
+		B: xhr.responseURL,
 		aP: xhr.status,
 		aQ: xhr.statusText,
 		aD: _Http_parseHeaders(xhr.getAllResponseHeaders())
@@ -6075,7 +6075,7 @@ var $elm$http$Http$cmdMap = F2(
 					aH: r.aH,
 					aS: r.aS,
 					aU: r.aU,
-					A: r.A
+					B: r.B
 				});
 		}
 	});
@@ -6098,16 +6098,16 @@ var $elm$http$Http$subscription = _Platform_leaf('Http');
 var $elm$http$Http$request = function (r) {
 	return $elm$http$Http$command(
 		$elm$http$Http$Request(
-			{ax: false, S: r.S, w: r.w, aD: r.aD, aH: r.aH, aS: r.aS, aU: r.aU, A: r.A}));
+			{ax: false, S: r.S, w: r.w, aD: r.aD, aH: r.aH, aS: r.aS, aU: r.aU, B: r.B}));
 };
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
-		{S: $elm$http$Http$emptyBody, w: r.w, aD: _List_Nil, aH: 'GET', aS: $elm$core$Maybe$Nothing, aU: $elm$core$Maybe$Nothing, A: r.A});
+		{S: $elm$http$Http$emptyBody, w: r.w, aD: _List_Nil, aH: 'GET', aS: $elm$core$Maybe$Nothing, aU: $elm$core$Maybe$Nothing, B: r.B});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Person$Person = F4(
 	function (id, firstName, lastName, nickName) {
-		return {x: firstName, K: id, y: lastName, E: nickName};
+		return {x: firstName, K: id, y: lastName, z: nickName};
 	});
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
@@ -6199,7 +6199,7 @@ var $author$project$Person$personListDecoder = $elm$json$Json$Decode$list($autho
 var $author$project$Main$loadPersons = $elm$http$Http$get(
 	{
 		w: A2($elm$http$Http$expectJson, $author$project$Main$LoadPersons, $author$project$Person$personListDecoder),
-		A: '/api/persons'
+		B: '/api/persons'
 	});
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$loadPersons);
@@ -6211,7 +6211,7 @@ var $author$project$Main$subscriptions = function (_v0) {
 };
 var $author$project$Main$Data = F5(
 	function (persons, viewPerson, firstName, lastName, nickName) {
-		return {x: firstName, y: lastName, E: nickName, J: persons, ar: viewPerson};
+		return {x: firstName, y: lastName, z: nickName, J: persons, ar: viewPerson};
 	});
 var $author$project$Main$Display = function (a) {
 	return {$: 2, a: a};
@@ -6296,12 +6296,12 @@ var $author$project$Person$personEncoder = function (person) {
 				A2(
 					$elm$core$Maybe$withDefault,
 					$elm$json$Json$Encode$null,
-					A2($elm$core$Maybe$map, $elm$json$Json$Encode$string, person.E)))
+					A2($elm$core$Maybe$map, $elm$json$Json$Encode$string, person.z)))
 			]));
 };
 var $elm$http$Http$post = function (r) {
 	return $elm$http$Http$request(
-		{S: r.S, w: r.w, aD: _List_Nil, aH: 'POST', aS: $elm$core$Maybe$Nothing, aU: $elm$core$Maybe$Nothing, A: r.A});
+		{S: r.S, w: r.w, aD: _List_Nil, aH: 'POST', aS: $elm$core$Maybe$Nothing, aU: $elm$core$Maybe$Nothing, B: r.B});
 };
 var $author$project$Main$addPerson = function (person) {
 	return $elm$http$Http$post(
@@ -6312,7 +6312,7 @@ var $author$project$Main$addPerson = function (person) {
 				function (_v0) {
 					return $author$project$Main$Reloaded;
 				}),
-			A: '/api/persons/'
+			B: '/api/persons/'
 		});
 };
 var $author$project$Main$null = $elm$core$Maybe$Nothing;
@@ -6332,7 +6332,7 @@ var $author$project$Main$changeField = F4(
 						$author$project$Main$null,
 						A2($author$project$Main$or, data.x, firstName),
 						A2($author$project$Main$or, data.y, lastName),
-						A2($author$project$Main$or, data.E, nickName))),
+						A2($author$project$Main$or, data.z, nickName))),
 				$author$project$Main$stop);
 		} else {
 			return _Utils_Tuple2(model, $author$project$Main$stop);
@@ -6340,7 +6340,7 @@ var $author$project$Main$changeField = F4(
 	});
 var $author$project$Main$delete = function (spec) {
 	return $elm$http$Http$request(
-		{S: $elm$http$Http$emptyBody, w: spec.w, aD: _List_Nil, aH: 'DELETE', aS: $author$project$Main$null, aU: $author$project$Main$null, A: spec.A});
+		{S: $elm$http$Http$emptyBody, w: spec.w, aD: _List_Nil, aH: 'DELETE', aS: $author$project$Main$null, aU: $author$project$Main$null, B: spec.B});
 };
 var $author$project$Main$deletePerson = function (id) {
 	return $author$project$Main$delete(
@@ -6349,7 +6349,7 @@ var $author$project$Main$deletePerson = function (id) {
 				function (_v0) {
 					return $author$project$Main$Reloaded;
 				}),
-			A: '/api/persons/' + id
+			B: '/api/persons/' + id
 		});
 };
 var $author$project$Main$LoadPerson = function (a) {
@@ -6359,7 +6359,7 @@ var $author$project$Main$loadPerson = function (id) {
 	return $elm$http$Http$get(
 		{
 			w: A2($elm$http$Http$expectJson, $author$project$Main$LoadPerson, $author$project$Person$personDecoder),
-			A: '/api/persons/' + id
+			B: '/api/persons/' + id
 		});
 };
 var $author$project$Main$update = F2(
@@ -6531,6 +6531,14 @@ var $author$project$Main$DeletePerson = function (a) {
 var $author$project$Main$ShowPerson = function (a) {
 	return {$: 3, a: a};
 };
+var $author$project$Main$wrap = function (text) {
+	if (!text.$) {
+		var t = text.a;
+		return ' (' + (t + ')');
+	} else {
+		return '';
+	}
+};
 var $author$project$Main$viewEachPerson = function (person) {
 	return A2(
 		$elm$html$Html$div,
@@ -6564,7 +6572,8 @@ var $author$project$Main$viewEachPerson = function (person) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(person.x + (' ' + person.y))
+						$elm$html$Html$text(
+						person.x + (' ' + (person.y + $author$project$Main$wrap(person.z))))
 					]))
 			]));
 };
@@ -6645,7 +6654,7 @@ var $author$project$Main$viewPerson = function (person) {
 								$elm$html$Html$text('Nick name')
 							])),
 						$elm$html$Html$text(
-						A2($author$project$Main$or, '<no-nick-name>', person.E))
+						A2($author$project$Main$or, '<no-nick-name>', person.z))
 					]))
 			]));
 };
@@ -6777,7 +6786,7 @@ var $author$project$Main$view = function (model) {
 												_List_fromArray(
 													[
 														$elm$html$Html$Attributes$placeholder('Nick name'),
-														$elm$html$Html$Attributes$value(data.E),
+														$elm$html$Html$Attributes$value(data.z),
 														$elm$html$Html$Events$onInput($author$project$Main$ChangeNN)
 													]),
 												_List_Nil)
@@ -6799,7 +6808,7 @@ var $author$project$Main$view = function (model) {
 														$author$project$Main$null,
 														data.x,
 														data.y,
-														$elm$core$Maybe$Just(data.E))))
+														$elm$core$Maybe$Just(data.z))))
 											]),
 										_List_fromArray(
 											[
