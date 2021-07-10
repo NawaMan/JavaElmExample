@@ -7,7 +7,7 @@ import Html.Events exposing (..)
 import Http
 import Person exposing (..)
 
-
+main : Program () Model Msg
 main =
   Browser.element
     { init          = init
@@ -17,11 +17,19 @@ main =
     }
 
 
+type alias Data = 
+  { persons            : List  Person
+  , viewPerson         : Maybe Person
+  , newPersonFirstName : String
+  , newPersonLastName  : String
+  , newPersonNickName  : String
+  }
+
+
 type Model
   = Loading
   | Failure
-  | Success (List Person)
-  | View    ((List Person), Person)
+  | Display Data
 
 
 init : () -> (Model, Cmd Msg)
@@ -35,6 +43,11 @@ type Msg
   | ShowPerson   String
   | DeletePerson String
   | Deleted
+  | Added
+  | AddPerson    Person
+  | ChangeFN     String
+  | ChangeLN     String
+  | ChangeNN     String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -43,7 +56,7 @@ update msg model =
     LoadPersons result ->
       case result of
         Ok persons ->
-          (Success persons, Cmd.none)
+          ((Display (Data persons Maybe.Nothing "" "" "")), Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)
@@ -52,31 +65,48 @@ update msg model =
       case result of
         Ok person ->
           case model of
-            Loading ->
-              (View ([], person), Cmd.none)
-            Failure ->
-              (View ([], person), Cmd.none)
-            Success persons ->
-              (View (persons, person), Cmd.none)
-            View (persons, _) ->
-              (View (persons, person), Cmd.none)
+            Display data ->
+              ((Display (Data data.persons (Maybe.Just person) "" "" "")), Cmd.none)
+            _ ->
+              ((Display (Data [] Maybe.Nothing "" "" "")), Cmd.none)
 
         Err _ ->
           (Failure, Cmd.none)
     ShowPerson id ->
       (model, loadPerson id)
     DeletePerson id ->
-      (Loading, deletePerson id)
+      (model, deletePerson id)
     Deleted ->
-      (Loading, loadPersons)
-
+      (model, loadPersons)
+    Added ->
+      (model, loadPersons)
+    AddPerson person ->
+      (model, addPerson person)
+    ChangeFN firstName ->
+      case model of
+        Display data ->
+          ((Display (Data data.persons Maybe.Nothing firstName data.newPersonLastName data.newPersonNickName)), Cmd.none)
+        _ ->
+          (model, Cmd.none)
+    ChangeLN lastName ->
+      case model of
+        Display data ->
+          ((Display (Data data.persons Maybe.Nothing data.newPersonFirstName lastName data.newPersonNickName)), Cmd.none)
+        _ ->
+          (model, Cmd.none)
+    ChangeNN nickName ->
+      case model of
+        Display data ->
+          ((Display (Data data.persons Maybe.Nothing data.newPersonFirstName data.newPersonLastName nickName)), Cmd.none)
+        _ ->
+          (model, Cmd.none)
 
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Sub.none
 
 
@@ -98,48 +128,71 @@ viewPersons model =
     Loading ->
       text "Loading..."
 
-    Success persons ->
+    Display data ->
       div []
           [ h2 [] [ text "Persons" ]
           , div [ class "persons" ]
-            [ ul []
-              (persons
-                |> List.map (\person -> viewEachPerson person)
-              )
-            ]
+                [ ul []
+                  (data.persons
+                    |> List.map (\person -> viewEachPerson person)
+                  )
+                ]
+          , h2 [] [ text "New Person" ]
+          , div [ class "persons" ]
+              [ div []
+                    [ span [class "person-label"] 
+                           [ text "First name: "
+                           , input [ placeholder "First name", value data.newPersonFirstName, onInput ChangeFN ] []
+                           ]
+                    ]
+              , div []
+                    [ span [class "person-label"] 
+                           [ text "Last name: "
+                           , input [ placeholder "Last name", value data.newPersonLastName, onInput ChangeLN ] []
+                           ]
+                    ]
+              , div []
+                    [ span [class "person-label"] 
+                           [ text "Nick name: "
+                           , input [ placeholder "Nick name", value data.newPersonNickName, onInput ChangeNN ] []
+                           ]
+                    ]
+              , div []
+                    [ button [ onClick (AddPerson (Person Maybe.Nothing data.newPersonFirstName data.newPersonLastName (Maybe.Just data.newPersonNickName))) ]
+                             [ text "Add" ]
+                    ]
+              ]
+          , case data.viewPerson of 
+                Just person ->
+                  viewPerson person
+
+                Maybe.Nothing ->
+                  div [][]
           ]
-    View (persons, person) -> 
-      viewPerson persons person
 
 
 viewEachPerson : Person -> Html Msg
 viewEachPerson person = 
-  div 
-    [ class "person"
-    , onClick (ShowPerson (Maybe.withDefault "-" person.id)) ]
-    [ span [ class "remove-person"
-           , onClick (DeletePerson (Maybe.withDefault "-" person.id))
-           ] 
-           [text " x "]
-    , text person.firstName
-    , text " "
-    , text person.lastName
-    ]
-
-
-viewPerson : (List Person) -> Person -> Html Msg
-viewPerson persons person = 
-  div [ class "person" ]
-  [ div []
-    [ h2 [] [ text "Persons" ]
-    , div [ class "persons" ]
-      [ ul []
-        (persons
-          |> List.map (\p -> viewEachPerson p)
-        )
+  div []
+      [ div 
+        [ class "person" ]
+        [ span [ class "remove-person"
+               , onClick (DeletePerson (Maybe.withDefault "-" person.id))
+               ] 
+               [text " x "]
+        , span [ onClick (ShowPerson (Maybe.withDefault "-" person.id))]
+               [ text person.firstName
+               , text " "
+               , text person.lastName
+               ]
+        ]
       ]
-    ]
-  , div [ class "person-field" ]
+
+
+viewPerson : Person -> Html Msg
+viewPerson person = 
+  div [ class "person" ]
+  [ div [ class "person-field" ]
       [ span [class "person-label"] 
              [text "ID"]
       , text (Maybe.withDefault "-" person.id)
@@ -180,6 +233,7 @@ loadPerson id =
     , expect = Http.expectJson LoadPerson personDecoder
     }
 
+
 deletePerson : String -> (Cmd Msg)
 deletePerson id =
   Http.request
@@ -190,4 +244,13 @@ deletePerson id =
     , expect = Http.expectWhatever (\_ -> Deleted)
     , timeout = Nothing
     , tracker = Nothing
+    }
+
+
+addPerson : Person -> (Cmd Msg)
+addPerson person =
+  Http.post
+    { url = "/api/persons/"
+    , body = Http.jsonBody (personEncoder person)
+    , expect = Http.expectWhatever (\_ -> Added)
     }

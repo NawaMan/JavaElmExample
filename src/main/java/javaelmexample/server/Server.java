@@ -147,9 +147,10 @@ public class Server {
                 var personId    = path.replaceAll("^(/api/persons/)([^/]+)$", "$2");
                 var person      = personalService.delete(personId);
                 if (person.isEmpty()) {
-                    responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
+                    responseHttp(exchange, 404, null, "{}".getBytes());
                 } else {
-                    exchange.sendResponseHeaders(204, -1);
+                    var contentType = extContentTypes.get(".json");
+                    responseHttp(exchange, 200, contentType, "{}".getBytes());
                 }
                 return;
             }
