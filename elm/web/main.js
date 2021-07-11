@@ -6317,7 +6317,8 @@ var $author$project$Main$addPerson = function (person) {
 	return $elm$http$Http$post(
 		{
 			body: $elm$http$Http$jsonBody(
-				$author$project$Person$personEncoder(person)),
+				$author$project$Person$personEncoder(
+					A4($author$project$Person$Person, $elm$core$Maybe$Nothing, person.firstName, person.lastName, person.nickName))),
 			expect: $elm$http$Http$expectWhatever(
 				function (_v0) {
 					return $author$project$Main$Reloaded;
@@ -6325,10 +6326,8 @@ var $author$project$Main$addPerson = function (person) {
 			url: '/api/persons/'
 		});
 };
-var $author$project$Main$or = $elm$core$Maybe$withDefault;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$stop = $elm$core$Platform$Cmd$none;
 var $author$project$Main$changeField = F4(
 	function (model, firstName, lastName, nickName) {
 		if (model.$ === 'Display') {
@@ -6341,28 +6340,27 @@ var $author$project$Main$changeField = F4(
 						A4(
 							$author$project$Person$Person,
 							data.person.id,
-							A2($author$project$Main$or, data.person.firstName, firstName),
-							A2($author$project$Main$or, data.person.lastName, lastName),
+							A2($elm$core$Maybe$withDefault, data.person.firstName, firstName),
+							A2($elm$core$Maybe$withDefault, data.person.lastName, lastName),
 							$elm$core$Maybe$Just(
 								A2(
-									$author$project$Main$or,
-									A2($author$project$Main$or, '', data.person.nickName),
+									$elm$core$Maybe$withDefault,
+									A2($elm$core$Maybe$withDefault, '', data.person.nickName),
 									nickName))),
 						data.mode)),
-				$author$project$Main$stop);
+				$elm$core$Platform$Cmd$none);
 		} else {
-			return _Utils_Tuple2(model, $author$project$Main$stop);
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Main$null = $elm$core$Maybe$Nothing;
 var $author$project$Main$change = function (spec) {
 	return $elm$http$Http$request(
-		{body: spec.body, expect: spec.expect, headers: _List_Nil, method: 'PUT', timeout: $author$project$Main$null, tracker: $author$project$Main$null, url: spec.url});
+		{body: spec.body, expect: spec.expect, headers: _List_Nil, method: 'PUT', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: spec.url});
 };
 var $author$project$Main$changePerson = function (person) {
 	var _v0 = person.id;
 	if (_v0.$ === 'Nothing') {
-		return $author$project$Main$stop;
+		return $elm$core$Platform$Cmd$none;
 	} else {
 		var id = _v0.a;
 		return $author$project$Main$change(
@@ -6379,7 +6377,7 @@ var $author$project$Main$changePerson = function (person) {
 };
 var $author$project$Main$delete = function (spec) {
 	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: spec.expect, headers: _List_Nil, method: 'DELETE', timeout: $author$project$Main$null, tracker: $author$project$Main$null, url: spec.url});
+		{body: $elm$http$Http$emptyBody, expect: spec.expect, headers: _List_Nil, method: 'DELETE', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: spec.url});
 };
 var $author$project$Main$deletePerson = function (id) {
 	return $author$project$Main$delete(
@@ -6391,7 +6389,7 @@ var $author$project$Main$deletePerson = function (id) {
 			url: '/api/persons/' + id
 		});
 };
-var $author$project$Main$emptyPerson = A4($author$project$Person$Person, $author$project$Main$null, '', '', $author$project$Main$null);
+var $author$project$Main$emptyPerson = A4($author$project$Person$Person, $elm$core$Maybe$Nothing, '', '', $elm$core$Maybe$Nothing);
 var $author$project$Main$LoadPerson = function (a) {
 	return {$: 'LoadPerson', a: a};
 };
@@ -6414,9 +6412,9 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						$author$project$Main$Display(
 							A3($author$project$Main$Data, persons, $author$project$Main$emptyPerson, $author$project$Main$Listing)),
-						$author$project$Main$stop);
+						$elm$core$Platform$Cmd$none);
 				} else {
-					return _Utils_Tuple2($author$project$Main$Failure, $author$project$Main$stop);
+					return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
 				}
 			case 'LoadPerson':
 				var result = msg.a;
@@ -6428,17 +6426,17 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(
 								$author$project$Main$Display(
 									A3($author$project$Main$Data, data.persons, person, $author$project$Main$Viewing)),
-								$author$project$Main$stop);
+								$elm$core$Platform$Cmd$none);
 						case 'Loading':
 							return _Utils_Tuple2(
 								$author$project$Main$Display(
 									A3($author$project$Main$Data, _List_Nil, $author$project$Main$emptyPerson, $author$project$Main$Listing)),
-								$author$project$Main$stop);
+								$elm$core$Platform$Cmd$none);
 						default:
-							return _Utils_Tuple2($author$project$Main$Failure, $author$project$Main$stop);
+							return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
 					}
 				} else {
-					return _Utils_Tuple2($author$project$Main$Failure, $author$project$Main$stop);
+					return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
 				}
 			case 'AddPerson':
 				var person = msg.a;
@@ -6465,48 +6463,48 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					$author$project$Main$Display(
 						A3($author$project$Main$Data, data.persons, $author$project$Main$emptyPerson, $author$project$Main$Listing)),
-					$author$project$Main$stop);
+					$elm$core$Platform$Cmd$none);
 			case 'ToViewing':
 				var data = msg.a;
 				return _Utils_Tuple2(
 					$author$project$Main$Display(
 						A3($author$project$Main$Data, data.persons, data.person, $author$project$Main$Viewing)),
-					$author$project$Main$stop);
+					$elm$core$Platform$Cmd$none);
 			case 'ToAdding':
 				var data = msg.a;
 				return _Utils_Tuple2(
 					$author$project$Main$Display(
 						A3($author$project$Main$Data, data.persons, $author$project$Main$emptyPerson, $author$project$Main$Adding)),
-					$author$project$Main$stop);
+					$elm$core$Platform$Cmd$none);
 			case 'ToEditing':
 				var data = msg.a;
 				return _Utils_Tuple2(
 					$author$project$Main$Display(
 						A3($author$project$Main$Data, data.persons, data.person, $author$project$Main$Editing)),
-					$author$project$Main$stop);
+					$elm$core$Platform$Cmd$none);
 			case 'EditFirstName':
 				var firstName = msg.a;
 				return A4(
 					$author$project$Main$changeField,
 					model,
 					$elm$core$Maybe$Just(firstName),
-					$author$project$Main$null,
-					$author$project$Main$null);
+					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Nothing);
 			case 'EditLastName':
 				var lastName = msg.a;
 				return A4(
 					$author$project$Main$changeField,
 					model,
-					$author$project$Main$null,
+					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Just(lastName),
-					$author$project$Main$null);
+					$elm$core$Maybe$Nothing);
 			default:
 				var nickName = msg.a;
 				return A4(
 					$author$project$Main$changeField,
 					model,
-					$author$project$Main$null,
-					$author$project$Main$null,
+					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Just(nickName));
 		}
 	});
@@ -6527,14 +6525,6 @@ var $author$project$Main$ToViewing = function (a) {
 	return {$: 'ToViewing', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -6585,18 +6575,24 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$editPerson = function (data) {
+	var person = data.person;
+	var personId = A2($elm$core$Maybe$withDefault, '-', person.id);
+	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('person')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
@@ -6613,16 +6609,12 @@ var $author$project$Main$editPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('id')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('ID'),
-								$elm$html$Html$text(
-								A2($author$project$Main$or, '-', data.person.id))
-							]))
+								$elm$html$Html$text('ID')
+							])),
+						$elm$html$Html$text(personId)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6631,23 +6623,19 @@ var $author$project$Main$editPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('first')
+								$elm$html$Html$text('First name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(person.firstName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditFirstName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('First name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('First name'),
-										$elm$html$Html$Attributes$value(data.person.firstName),
-										$elm$html$Html$Events$onInput($author$project$Main$EditFirstName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6656,23 +6644,19 @@ var $author$project$Main$editPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('last')
+								$elm$html$Html$text('Last name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(person.lastName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditLastName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Last name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('Last name'),
-										$elm$html$Html$Attributes$value(data.person.lastName),
-										$elm$html$Html$Events$onInput($author$project$Main$EditLastName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6681,24 +6665,19 @@ var $author$project$Main$editPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('nick')
+								$elm$html$Html$text('Nick name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(personNickName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Nick name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('Nick name'),
-										$elm$html$Html$Attributes$value(
-										A2($author$project$Main$or, '', data.person.nickName)),
-										$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6710,7 +6689,7 @@ var $author$project$Main$editPerson = function (data) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$ChangePerson(data.person))
+								$author$project$Main$ChangePerson(person))
 							]),
 						_List_fromArray(
 							[
@@ -6751,20 +6730,16 @@ var $author$project$Main$wrap = function (text) {
 var $author$project$Main$viewEachPerson = function (person) {
 	return A2(
 		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('person')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
 				$elm$html$Html$span,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('remove'),
 						$elm$html$Html$Events$onClick(
 						$author$project$Main$DeletePerson(
-							A2($author$project$Main$or, '-', person.id)))
+							A2($elm$core$Maybe$withDefault, '-', person.id)))
 					]),
 				_List_fromArray(
 					[
@@ -6774,10 +6749,9 @@ var $author$project$Main$viewEachPerson = function (person) {
 				$elm$html$Html$span,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('item'),
 						$elm$html$Html$Events$onClick(
 						$author$project$Main$ViewPerson(
-							A2($author$project$Main$or, '-', person.id)))
+							A2($elm$core$Maybe$withDefault, '-', person.id)))
 					]),
 				_List_fromArray(
 					[
@@ -6801,10 +6775,7 @@ var $author$project$Main$listPersons = function (data) {
 					])),
 				A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('persons')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
@@ -6837,12 +6808,11 @@ var $author$project$Main$ToListing = function (a) {
 	return {$: 'ToListing', a: a};
 };
 var $author$project$Main$newPerson = function (data) {
+	var person = data.person;
+	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('person')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
@@ -6859,23 +6829,19 @@ var $author$project$Main$newPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('first')
+								$elm$html$Html$text('First name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(person.firstName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditFirstName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('First name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('First name'),
-										$elm$html$Html$Attributes$value(data.person.firstName),
-										$elm$html$Html$Events$onInput($author$project$Main$EditFirstName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6884,23 +6850,19 @@ var $author$project$Main$newPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('last')
+								$elm$html$Html$text('Last name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(person.lastName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditLastName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Last name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('Last name'),
-										$elm$html$Html$Attributes$value(data.person.lastName),
-										$elm$html$Html$Events$onInput($author$project$Main$EditLastName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6909,24 +6871,19 @@ var $author$project$Main$newPerson = function (data) {
 					[
 						A2(
 						$elm$html$Html$span,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('nick')
+								$elm$html$Html$text('Nick name')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(personNickName),
+								$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
 							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Nick name'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('Nick name'),
-										$elm$html$Html$Attributes$value(
-										A2($author$project$Main$or, '', data.person.nickName)),
-										$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
-									]),
-								_List_Nil)
-							]))
+						_List_Nil)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -6938,8 +6895,7 @@ var $author$project$Main$newPerson = function (data) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$AddPerson(
-									A4($author$project$Person$Person, $author$project$Main$null, data.person.firstName, data.person.lastName, data.person.nickName)))
+								$author$project$Main$AddPerson(data.person))
 							]),
 						_List_fromArray(
 							[
@@ -6963,12 +6919,12 @@ var $author$project$Main$ToEditing = function (a) {
 	return {$: 'ToEditing', a: a};
 };
 var $author$project$Main$viewPerson = function (data) {
+	var person = data.person;
+	var personId = A2($elm$core$Maybe$withDefault, '-', person.id);
+	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('person')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
@@ -6980,10 +6936,7 @@ var $author$project$Main$viewPerson = function (data) {
 					])),
 				A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('person-id')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
@@ -6993,15 +6946,11 @@ var $author$project$Main$viewPerson = function (data) {
 							[
 								$elm$html$Html$text('ID')
 							])),
-						$elm$html$Html$text(
-						A2($author$project$Main$or, '-', data.person.id))
+						$elm$html$Html$text(personId)
 					])),
 				A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('person-first')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
@@ -7011,14 +6960,11 @@ var $author$project$Main$viewPerson = function (data) {
 							[
 								$elm$html$Html$text('First name')
 							])),
-						$elm$html$Html$text(data.person.firstName)
+						$elm$html$Html$text(person.firstName)
 					])),
 				A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('person-last')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
@@ -7028,14 +6974,11 @@ var $author$project$Main$viewPerson = function (data) {
 							[
 								$elm$html$Html$text('Last name')
 							])),
-						$elm$html$Html$text(data.person.lastName)
+						$elm$html$Html$text(person.lastName)
 					])),
 				A2(
 				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('person-nick')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						A2(
@@ -7045,8 +6988,7 @@ var $author$project$Main$viewPerson = function (data) {
 							[
 								$elm$html$Html$text('Nick name')
 							])),
-						$elm$html$Html$text(
-						A2($author$project$Main$or, '<no-nick-name>', data.person.nickName))
+						$elm$html$Html$text(personNickName)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -7069,8 +7011,7 @@ var $author$project$Main$viewPerson = function (data) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$DeletePerson(
-									A2($author$project$Main$or, '-', data.person.id)))
+								$author$project$Main$DeletePerson(personId))
 							]),
 						_List_fromArray(
 							[

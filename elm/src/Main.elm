@@ -45,7 +45,7 @@ type Msg
   | EditNickName  String
 
 emptyPerson : Person
-emptyPerson = Person null "" "" null
+emptyPerson = Person Nothing "" "" Nothing
 
 init : () -> (Model, Cmd Msg)
 init _ = (Loading, loadPersons)
@@ -60,15 +60,15 @@ changeField model firstName lastName nickName =
                   data.persons 
                   (Person 
                     data.person.id 
-                    (firstName |> or data.person.firstName) 
-                    (lastName  |> or data.person.lastName) 
-                    (Just (nickName |> or (data.person.nickName |> or "")))
+                    (firstName |> withDefault data.person.firstName) 
+                    (lastName  |> withDefault data.person.lastName) 
+                    (Just (nickName |> withDefault (data.person.nickName |> withDefault "")))
                   )
                   data.mode
                 )
               ),
-              stop)
-        _ ->  (model, stop)
+              Cmd.none)
+        _ -> (model, Cmd.none)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -77,31 +77,31 @@ update msg model =
 
     LoadPersons result ->
       case result of
-        Ok persons -> ((Display (Data persons emptyPerson Listing)), stop)
-        Err _      -> (Failure, stop)
+        Ok persons -> ((Display (Data persons emptyPerson Listing)), Cmd.none)
+        Err _      -> (Failure, Cmd.none)
 
     LoadPerson result ->
       case result of
         Ok person ->
           case model of
-            Display data -> ((Display (Data data.persons person      Viewing)), stop)
-            Loading      -> ((Display (Data []           emptyPerson Listing)), stop)
-            Failure      -> (Failure, stop)
-        Err _            -> (Failure, stop)
+            Display data -> ((Display (Data data.persons person      Viewing)), Cmd.none)
+            Loading      -> ((Display (Data []           emptyPerson Listing)), Cmd.none)
+            Failure      -> (Failure, Cmd.none)
+        Err _            -> (Failure, Cmd.none)
     
     AddPerson    person   -> (model, addPerson    person)
     ViewPerson   personId -> (model, loadPerson   personId)
     ChangePerson person   -> (model, changePerson person)
     DeletePerson personId -> (model, deletePerson personId)
 
-    ToListing data -> (Display (Data data.persons emptyPerson Listing), stop)
-    ToViewing data -> (Display (Data data.persons data.person Viewing), stop)
-    ToAdding  data -> (Display (Data data.persons emptyPerson Adding),  stop)
-    ToEditing data -> (Display (Data data.persons data.person Editing), stop)
+    ToListing data -> (Display (Data data.persons emptyPerson Listing), Cmd.none)
+    ToViewing data -> (Display (Data data.persons data.person Viewing), Cmd.none)
+    ToAdding  data -> (Display (Data data.persons emptyPerson Adding),  Cmd.none)
+    ToEditing data -> (Display (Data data.persons data.person Editing), Cmd.none)
 
-    EditFirstName firstName -> (changeField model (Just firstName)  null            null)
-    EditLastName  lastName  -> (changeField model  null            (Just lastName)  null)
-    EditNickName  nickName  -> (changeField model  null             null           (Just nickName))
+    EditFirstName firstName -> (changeField model (Just firstName)  Nothing         Nothing)
+    EditLastName  lastName  -> (changeField model  Nothing         (Just lastName)  Nothing)
+    EditNickName  nickName  -> (changeField model  Nothing          Nothing        (Just nickName))
 
 
 -- SUBSCRIPTIONS
@@ -130,55 +130,64 @@ view model =
 listPersons : Data -> Html Msg
 listPersons data = 
   div []
-      [ h2  [] [ text "Persons" ]
-      , div [ class "persons" ] [ ul [] (data.persons |> List.map (\person -> viewEachPerson person)) ]
+      [ h2     []                          [ text "Persons" ]
+      , div    []                          [ ul [] (data.persons |> List.map (\person -> viewEachPerson person)) ]
       , button [ onClick (ToAdding data) ] [ text "New person" ]
       ]
 
 viewEachPerson : Person -> Html Msg
 viewEachPerson person = 
-  div [ class "person" ]
-      [ span [ class "remove", onClick (DeletePerson (person.id |> or "-"))] [ text " x " ]
-      , span [ class "item",   onClick (ViewPerson   (person.id |> or "-"))] [ text (person.firstName ++ " " ++ person.lastName ++ (wrap person.nickName)) ]
+  div []
+      [ span [ onClick (DeletePerson (person.id |> withDefault "-"))] 
+             [ text " x " ]
+      , span [ onClick (ViewPerson   (person.id |> withDefault "-"))] 
+             [ text (person.firstName ++ " " ++ person.lastName ++ (wrap person.nickName)) ]
       ]
 
 viewPerson : Data -> Html Msg
 viewPerson data = 
-  div [ class "person" ]
+  let person = data.person
+      personId = person.id |> withDefault "-"
+      personNickName = person.nickName |> withDefault ""
+  in  div []
       [ h2  [] [ text "Person" ]
-      , div [ class "person-id" ]    [ span [] [text "ID"],         text (data.person.id |> or "-")]
-      , div [ class "person-first" ] [ span [] [text "First name"], text  data.person.firstName ]
-      , div [ class "person-last" ]  [ span [] [text "Last name"],  text  data.person.lastName  ]
-      , div [ class "person-nick" ]  [ span [] [text "Nick name"],  text (data.person.nickName |> or "<no-nick-name>") ]
-      , div []
-            [ button [ onClick (ToEditing     data)                      ] [ text "Edit" ]
-            , button [ onClick (DeletePerson (data.person.id |> or "-")) ] [ text "Delete" ]
-            , button [ onClick (ToListing     data)                      ] [ text "Cancel" ]
-            ]
+      , div [] [ span [] [text "ID"],         text personId]
+      , div [] [ span [] [text "First name"], text person.firstName ]
+      , div [] [ span [] [text "Last name"],  text person.lastName  ]
+      , div [] [ span [] [text "Nick name"],  text personNickName ]
+      , div [] [ button [ onClick (ToEditing    data)     ] [ text "Edit" ]
+               , button [ onClick (DeletePerson personId) ] [ text "Delete" ]
+               , button [ onClick (ToListing    data)     ] [ text "Cancel" ]
+               ]
       ]
 
 editPerson : Data -> Html Msg
 editPerson data =
-  div [ class "person" ]
+  let person = data.person
+      personId = person.id |> withDefault "-"
+      personNickName = person.nickName |> withDefault ""
+  in  div []
       [ h2  [] [ text "Edit Person" ]
-      , div [] [ span   [ class "id"    ] [ text "ID",         text (data.person.id |> or "-")]]
-      , div [] [ span   [ class "first" ] [ text "First name", input [ placeholder "First name", value  data.person.firstName,          onInput EditFirstName ] []]]
-      , div [] [ span   [ class "last"  ] [ text "Last name",  input [ placeholder "Last name",  value  data.person.lastName,           onInput EditLastName ] []]]
-      , div [] [ span   [ class "nick"  ] [ text "Nick name",  input [ placeholder "Nick name",  value (data.person.nickName |> or ""), onInput EditNickName ] []]]
-      , div [] [ button [ onClick (ChangePerson data.person) ] [ text "Save" ]
-               , button [ onClick (ToViewing    data)        ] [ text "Cancel" ]
+      , div [] [ span [] [text "ID"],         text personId]
+      , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
+      , div [] [ span [] [text "Last name"],  input [ value person.lastName,  onInput EditLastName  ] []]
+      , div [] [ span [] [text "Nick name"],  input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ button [ onClick (ChangePerson person) ] [ text "Save" ]
+               , button [ onClick (ToViewing    data)   ] [ text "Cancel" ]
                ]
       ]
 
 newPerson : Data -> Html Msg
 newPerson data =
-  div [ class "person" ]
+  let person = data.person
+      personNickName = person.nickName |> withDefault ""
+  in  div []
       [ h2  [] [ text "New Person" ]
-      , div [] [ span   [ class "first" ] [ text "First name", input [ placeholder "First name", value  data.person.firstName,          onInput EditFirstName ] []]]
-      , div [] [ span   [ class "last"  ] [ text "Last name",  input [ placeholder "Last name",  value  data.person.lastName,           onInput EditLastName ] []]]
-      , div [] [ span   [ class "nick"  ] [ text "Nick name",  input [ placeholder "Nick name",  value (data.person.nickName |> or ""), onInput EditNickName ] []]]
-      , div [] [ button [ onClick (AddPerson (Person null data.person.firstName data.person.lastName data.person.nickName)) ] [ text "Add" ]
-               , button [ onClick (ToListing data)                                                                          ] [ text "Cancel" ]
+      , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
+      , div [] [ span [] [text "Last name"],  input [ value person.lastName,  onInput EditLastName  ] []]
+      , div [] [ span [] [text "Nick name"],  input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ button [ onClick (AddPerson data.person) ] [ text "Add" ]
+               , button [ onClick (ToListing data)        ] [ text "Cancel" ]
                ]
       ]
 
@@ -200,37 +209,31 @@ loadPerson id = get {
 addPerson : Person -> (Cmd Msg)
 addPerson person = post {
     url    = "/api/persons/",
-    body   = jsonBody (personEncoder person),
+    body   = jsonBody (personEncoder (Person Nothing person.firstName person.lastName person.nickName)),
     expect = expectWhatever (\_ -> Reloaded)
   }
 
 deletePerson : String -> (Cmd Msg)
 deletePerson id = delete { 
     url    = "/api/persons/" ++ id, 
-    expect = expectWhatever (\_ -> Reloaded)
+    expect = expectWhatever (\_ -> Reloaded)  -- Reloaded or Show error 
   }
 
 changePerson : Person -> (Cmd Msg)
 changePerson person = 
     case person.id of
-      Nothing -> stop
+      Nothing -> Cmd.none
       Just id -> change {
           url    = "/api/persons/" ++ id,
           body   = jsonBody (personEncoder person),
-          expect = expectWhatever (\_ -> Reloaded)
+          expect = expectWhatever (\_ -> Reloaded)  -- Reloaded or Show error 
         }
 
 
 -- utility functions --
 
-or : a -> Maybe a -> a
-or = withDefault
-
-null : Maybe a
-null = Nothing
-
-stop : Cmd msg
-stop = Cmd.none
+-- stop : Cmd msg
+-- stop = Cmd.none
 
 wrap : Maybe String -> String
 wrap text =
@@ -246,8 +249,8 @@ delete spec =
     , url = spec.url
     , body = emptyBody
     , expect = spec.expect
-    , timeout = null
-    , tracker = null
+    , timeout = Nothing
+    , tracker = Nothing
     }
 
 change : { url: String, body: Body, expect: Http.Expect Msg } -> (Cmd Msg)
@@ -258,6 +261,6 @@ change spec =
     , url = spec.url
     , body = spec.body
     , expect = spec.expect
-    , timeout = null
-    , tracker = null
+    , timeout = Nothing
+    , tracker = Nothing
     }
