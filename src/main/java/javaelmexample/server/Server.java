@@ -131,11 +131,25 @@ public class Server {
         }
         if (exchange.getRequestMethod().equals("POST")) {
             if (path.matches("^/api/persons/?$")) {
+                // TODO - Ensure id is not null or blank
                 var buffer = new ByteArrayOutputStream();
                 exchange.getRequestBody().transferTo(buffer);
                 var content     = new String(buffer.toByteArray());
                 var inPerson    = new Gson().fromJson(content, Person.class);
                 var outPerson   = personalService.post(inPerson);
+                var outContent  = new Gson().toJson(outPerson);
+                var contentType = extContentTypes.get(".json");
+                responseHttp(exchange, 200, contentType, outContent.getBytes());
+                return;
+            }
+        }
+        if (exchange.getRequestMethod().equals("PUT")) {
+            if (path.matches("^/api/persons/[^/]+$")) {
+                var buffer = new ByteArrayOutputStream();
+                exchange.getRequestBody().transferTo(buffer);
+                var content     = new String(buffer.toByteArray());
+                var inPerson    = new Gson().fromJson(content, Person.class);
+                var outPerson   = personalService.put(inPerson);
                 var outContent  = new Gson().toJson(outPerson);
                 var contentType = extContentTypes.get(".json");
                 responseHttp(exchange, 200, contentType, outContent.getBytes());

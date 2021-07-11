@@ -11,6 +11,8 @@ public interface Service<DATA> {
     
     public DATA post(DATA data);
     
+    public DATA put(DATA data);
+    
     public Optional<DATA> delete(String id);
     
 }

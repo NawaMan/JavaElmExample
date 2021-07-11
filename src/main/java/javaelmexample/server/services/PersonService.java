@@ -69,7 +69,13 @@ public class PersonService implements Service<Person> {
         persons.put(newPersonId, newPerson);
         return newPerson;
     }
-
+    
+    @Override
+    public Person put(Person person) {
+        persons.put(person.id, person);
+        return person;
+    }
+    
     @Override
     public Optional<Person> delete(String id) {
         return Optional.ofNullable(persons.remove(id));
