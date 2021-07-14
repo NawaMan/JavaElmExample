@@ -1,7 +1,9 @@
 package javaelmexample.server;
 
+import static functionalj.function.Func.f;
 import static functionalj.lens.Access.theString;
 import static functionalj.list.FuncList.listOf;
+import static functionalj.map.FuncMap.mapOf;
 import static functionalj.map.FuncMap.newMap;
 import static java.util.Collections.unmodifiableMap;
 import static nullablej.nullable.Nullable.nullable;
@@ -53,7 +55,8 @@ public class Server {
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
     
-    private PersonService personalService = null;
+    @SuppressWarnings("rawtypes")
+    private Map<String, ApiHandler> apiHandlers;
     
     public Server(int portNumber) {
         this(portNumber, null, null);
@@ -62,9 +65,13 @@ public class Server {
         this(portNumber, basePath, null);
     }
     public Server(int portNumber, String basePath, ExecutorService executor) {
-        this.basePath   = nullable(basePath).orElse   ("/");
-        this.executor   = nullable(executor).orElseGet(defaultExecutor);
-        this.portNumber = portNumber;
+        this.basePath    = nullable(basePath).orElse   ("/");
+        this.executor    = nullable(executor).orElseGet(defaultExecutor);
+        this.portNumber  = portNumber;
+        
+        this.apiHandlers 
+                = mapOf("persons", PersonService.create("data/persons.json"))
+                .mapValue(ApiHandler::new);
     }
     
     public void start() throws IOException {
@@ -75,11 +82,8 @@ public class Server {
         
         try {
             httpServer.start();
-            
-            personalService = PersonService.create("data/persons.json");
-            
             waitForKeyPress.run();
-            System.out.println("Shutting down ...");
+            System.out.println("Shutting down the server ...");
         } catch (Exception exception) {
             exception.printStackTrace();
         } finally {
@@ -92,7 +96,7 @@ public class Server {
     private void shutdown(HttpServer httpServer) {
         new Thread(()->{
             httpServer.stop(1);
-            System.out.println("HTTP Server is successfully stopped.");
+            System.out.println("Server is successfully stopped.");
         }).start();
     }
     
@@ -102,7 +106,7 @@ public class Server {
             path = basePath + "index.html";
         }
         
-        if (path.contains("/api/")) {
+        if (path.startsWith("/api/")) {
             handleApi(path, exchange);
         } else {
             handleFile(path, exchange);
@@ -110,14 +114,19 @@ public class Server {
     }
     
     private void handleApi(String path, HttpExchange exchange) throws IOException {
-        var pathParts = listOf(path.split("/")).filter(theString.thatIsNotBlank()).skip(/*`api`*/1).toFuncList();
-        var handler   = new ApiServiceHandler<>(personalService);
-        var isHandled = false;
+        var pathParts 
+                = listOf(path.split("/"))
+                .filter(theString.thatIsNotBlank())
+                .skip(/*`api`*/1)
+                .toFuncList();
+        
         var firstPath = pathParts.first();
-        if (firstPath.filter("persons"::equals).isPresent()) {
-            pathParts = pathParts.skip(1);
-            isHandled = handler.handle(pathParts, exchange);
-        }
+        var tailPath  = pathParts.skip(1);
+        
+        var isHandled 
+                = firstPath.map(apiHandlers::get)
+                .map(f((ApiHandler<?> handler) -> handler.handle(tailPath, exchange)))
+                .orElse(false);
         if (!isHandled) {
             responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
         }

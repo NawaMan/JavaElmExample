@@ -1,20 +1,20 @@
 package javaelmexample.server;
 
-import functionalj.result.Result;
-import functionalj.stream.StreamPlus;
+import functionalj.list.FuncList;
+import functionalj.promise.Promise;
 
 public interface Service<DATA> {
     
     public Class<DATA> dataClass();
     
-    public Result<DATA> get(String id);
+    public Promise<DATA> get(String id);
     
-    public StreamPlus<DATA> list();
+    public Promise<FuncList<DATA>> list();
     
-    public Result<DATA> post(DATA data);
+    public Promise<DATA> post(DATA data);
     
-    public Result<DATA> put(String id, DATA data);
+    public Promise<DATA> put(String id, DATA data);
     
-    public Result<DATA> delete(String id);
+    public Promise<DATA> delete(String id);
     
 }

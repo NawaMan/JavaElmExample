@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
-import functionalj.result.Result;
+import functionalj.list.FuncList;
+import functionalj.promise.Promise;
 import functionalj.stream.StreamPlus;
 import functionalj.types.Nullable;
 import functionalj.types.Struct;
@@ -59,30 +60,32 @@ public class PersonService implements Service<Person> {
     }
     
     @Override
-    public Result<Person> get(String id) {
+    public Promise<Person> get(String id) {
         var person = persons.get(id);
-        return Result.valueOf(person);
+        return Promise.ofValue(person);
     }
     
     @Override
-    public StreamPlus<Person> list() {
-        return StreamPlus.from(persons.values().stream());
+    public Promise<FuncList<Person>> list() {
+        var streamPlus = StreamPlus.from(persons.values().stream());
+        var funcList   = streamPlus.toFuncList();
+        return Promise.ofValue(funcList);
     }
     
     @Override
-    public Result<Person> post(Person person) {
+    public Promise<Person> post(Person person) {
         if (person == null) {
-            return Result.ofNull();
+            return Promise.ofValue(null);
         }
         
         var newPersonId = nullable(person.id).orElseGet(()->abs(rand.nextInt()) + "");
         var newPerson   = person.withId(newPersonId);
         persons.put(newPersonId, newPerson);
-        return Result.valueOf(newPerson);
+        return Promise.ofValue(newPerson);
     }
     
     @Override
-    public Result<Person> put(String id, Person person) {
+    public Promise<Person> put(String id, Person person) {
         if (person == null) {
             return null;
         }
@@ -92,13 +95,13 @@ public class PersonService implements Service<Person> {
         }
         
         persons.put(person.id, person);
-        return Result.valueOf(person);
+        return Promise.ofValue(person);
     }
     
     @Override
-    public Result<Person> delete(String id) {
+    public Promise<Person> delete(String id) {
         var person = persons.remove(id);
-        return Result.valueOf(person);
+        return Promise.ofValue(person);
     }
     
 }

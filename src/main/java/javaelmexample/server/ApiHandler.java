@@ -11,13 +11,13 @@ import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 
 import functionalj.list.FuncList;
-import functionalj.result.Result;
+import functionalj.promise.Promise;
 
-public class ApiServiceHandler<T> { 
+public class ApiHandler<T> { 
     
     private final Service<T> service;
     
-    public ApiServiceHandler(Service<T> service) {
+    public ApiHandler(Service<T> service) {
         this.service = service;
     }
     
@@ -29,14 +29,14 @@ public class ApiServiceHandler<T> {
         
         if (exchange.getRequestMethod().equals("GET")) {
             if (paths.isEmpty()) {
-                var items = service.list().toList();
-                responseResult(exchange, items);
+                var result = service.list().getResult();
+                responseResult(exchange, result.get());
                 return true;
             }
             if (paths.size() == 1) {
                 var itemId = paths.first().get();
                 var item   = service.get(itemId);
-                responseResult(exchange, item);
+                responsePromise(exchange, item);
                 return true;
             }
         }
@@ -44,7 +44,7 @@ public class ApiServiceHandler<T> {
             if (paths.size() == 0) {
                 var inItem  = extractBody(exchange, serviceData);
                 var outItem = service.post(inItem);
-                responseResult(exchange, outItem);
+                responsePromise(exchange, outItem);
                 return true;
             }
         }
@@ -53,7 +53,7 @@ public class ApiServiceHandler<T> {
                 var itemId  = paths.first().get();
                 var inItem  = extractBody(exchange, serviceData);
                 var outItem = service.put(itemId, inItem);
-                responseResult(exchange, outItem);
+                responsePromise(exchange, outItem);
                 return true;
             }
         }
@@ -61,7 +61,7 @@ public class ApiServiceHandler<T> {
             if (paths.size() == 1) {
                 var itemId = paths.first().get();
                 var item   = service.delete(itemId);
-                responseResult(exchange, item);
+                responsePromise(exchange, item);
                 return true;
             }
         }
@@ -83,11 +83,16 @@ public class ApiServiceHandler<T> {
         responseHttp(exchange, 200, contentType, json.getBytes());
     }
     
-    private void responseResult(HttpExchange exchange, Result<T> result) throws IOException {
+    private void responsePromise(HttpExchange exchange, Promise<T> promise) throws IOException {
+//        var result = promise.getResult(timeout, timeUnit);
+        var result = promise.getResult();
         if (result.isPresent()) {
             responseResult(exchange, result.get());
-        } else {
+        } else if (result.isNull()) {
             responseHttp(exchange, 404, null, "{}".getBytes());
+        } else {
+            // TODO - Handle this based on what the exception is.
+            result.orThrowRuntimeException();
         }
     }
     
