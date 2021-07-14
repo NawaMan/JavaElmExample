@@ -123,9 +123,10 @@ public class Server {
         var firstPath = pathParts.first();
         var tailPath  = pathParts.skip(1);
         
+        @SuppressWarnings({ "rawtypes", "unchecked" })
         var isHandled 
                 = firstPath.map(apiHandlers::get)
-                .map(f((ApiHandler<?> handler) -> handler.handle(tailPath, exchange)))
+                .map(f((ApiHandler handler) -> handler.handle(tailPath, exchange)))
                 .orElse(false);
         if (!isHandled) {
             responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
