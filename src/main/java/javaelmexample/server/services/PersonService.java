@@ -1,17 +1,19 @@
 package javaelmexample.server.services;
 
 import static java.lang.Math.abs;
+import static java.lang.String.format;
 import static nullablej.nullable.Nullable.nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
+import functionalj.result.Result;
 import functionalj.stream.StreamPlus;
 import functionalj.types.Nullable;
 import functionalj.types.Struct;
@@ -52,33 +54,51 @@ public class PersonService implements Service<Person> {
     
     private static final Map<String, Person> persons = new ConcurrentHashMap<>();
     
-    @Override
-    public Optional<Person> get(String id) {
-        return Optional.ofNullable(persons.get(id));
+    public Class<Person> dataClass() {
+        return Person.class;
     }
     
     @Override
-    public StreamPlus<Person> get() {
+    public Result<Person> get(String id) {
+        var person = persons.get(id);
+        return Result.valueOf(person);
+    }
+    
+    @Override
+    public StreamPlus<Person> list() {
         return StreamPlus.from(persons.values().stream());
     }
     
     @Override
-    public Person post(Person person) {
+    public Result<Person> post(Person person) {
+        if (person == null) {
+            return Result.ofNull();
+        }
+        
         var newPersonId = nullable(person.id).orElseGet(()->abs(rand.nextInt()) + "");
         var newPerson   = person.withId(newPersonId);
         persons.put(newPersonId, newPerson);
-        return newPerson;
+        return Result.valueOf(newPerson);
     }
     
     @Override
-    public Person put(Person person) {
+    public Result<Person> put(String id, Person person) {
+        if (person == null) {
+            return null;
+        }
+        if (!Objects.equals(id, person.id)) {
+            var errorMessage = format("ID mismatch: id=[%s] vs item.id=[%s]", id, person.id);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
         persons.put(person.id, person);
-        return person;
+        return Result.valueOf(person);
     }
     
     @Override
-    public Optional<Person> delete(String id) {
-        return Optional.ofNullable(persons.remove(id));
+    public Result<Person> delete(String id) {
+        var person = persons.remove(id);
+        return Result.valueOf(person);
     }
     
 }

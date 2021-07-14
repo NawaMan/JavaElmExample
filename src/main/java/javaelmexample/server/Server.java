@@ -1,7 +1,9 @@
 package javaelmexample.server;
 
+import static functionalj.lens.Access.theString;
 import static functionalj.list.FuncList.listOf;
 import static functionalj.map.FuncMap.newMap;
+import static java.util.Collections.unmodifiableMap;
 import static nullablej.nullable.Nullable.nullable;
 
 import java.io.ByteArrayInputStream;
@@ -15,30 +17,30 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import javaelmexample.server.services.Person;
 import javaelmexample.server.services.PersonService;
 
 public class Server {
     
     private static final Supplier<? extends ExecutorService> defaultExecutor = Executors::newCachedThreadPool;
     
-    private static final Map<String, String> extContentTypes = newMap(String.class, String.class)
-                    .with(".icon", "image/x-icon")
-                    .with(".html", "text/html; charset=utf-8")
-                    .with(".htm",  "text/html; charset=utf-8")
-                    .with(".js",   "application/javascript")
-                    .with(".css",  "text/css; charset=utf-8")
-                    .with(".json", "text/json; charset=utf-8")
-                    .with(".yaml", "text/yaml; charset=utf-8")
-                    .with(".yml",  "text/yaml; charset=utf-8")
-                    .with(".jpg",  "image/jpeg")
-                    .with(".jpeg", "image/jpeg")
-                    .with(".png",  "image/png")
-                    .build();
+    public static final Map<String, String> extContentTypes 
+                    = unmodifiableMap(
+                        newMap(String.class, String.class)
+                        .with(".icon", "image/x-icon")
+                        .with(".html", "text/html; charset=utf-8")
+                        .with(".htm",  "text/html; charset=utf-8")
+                        .with(".js",   "application/javascript")
+                        .with(".css",  "text/css; charset=utf-8")
+                        .with(".json", "text/json; charset=utf-8")
+                        .with(".yaml", "text/yaml; charset=utf-8")
+                        .with(".yml",  "text/yaml; charset=utf-8")
+                        .with(".jpg",  "image/jpeg")
+                        .with(".jpeg", "image/jpeg")
+                        .with(".png",  "image/png")
+                        .build());
     
     private final ExecutorService executor;
     private final int             portNumber;
@@ -108,68 +110,17 @@ public class Server {
     }
     
     private void handleApi(String path, HttpExchange exchange) throws IOException {
-        if (exchange.getRequestMethod().equals("GET")) {
-            if (path.matches("^/api/persons/?$")) {
-                var persons     = personalService.get().toList();
-                var result      = new Gson().toJson(persons);
-                var contentType = extContentTypes.get(".json");
-                responseHttp(exchange, 200, contentType, result.getBytes());
-                return;
-            }
-            if (path.matches("^/api/persons/[^/]+$")) {
-                var personId    = path.replaceAll("^(/api/persons/)([^/]+)$", "$2");
-                var person      = personalService.get(personId);
-                if (person.isEmpty()) {
-                    responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
-                } else {
-                    var result      = new Gson().toJson(person.get());
-                    var contentType = extContentTypes.get(".json");
-                    responseHttp(exchange, 200, contentType, result.getBytes());
-                }
-                return;
-            }
+        var pathParts = listOf(path.split("/")).filter(theString.thatIsNotBlank()).skip(/*`api`*/1).toFuncList();
+        var handler   = new ApiServiceHandler<>(personalService);
+        var isHandled = false;
+        var firstPath = pathParts.first();
+        if (firstPath.filter("persons"::equals).isPresent()) {
+            pathParts = pathParts.skip(1);
+            isHandled = handler.handle(pathParts, exchange);
         }
-        if (exchange.getRequestMethod().equals("POST")) {
-            if (path.matches("^/api/persons/?$")) {
-                // TODO - Ensure id is not null or blank
-                var buffer = new ByteArrayOutputStream();
-                exchange.getRequestBody().transferTo(buffer);
-                var content     = new String(buffer.toByteArray());
-                var inPerson    = new Gson().fromJson(content, Person.class);
-                var outPerson   = personalService.post(inPerson);
-                var outContent  = new Gson().toJson(outPerson);
-                var contentType = extContentTypes.get(".json");
-                responseHttp(exchange, 200, contentType, outContent.getBytes());
-                return;
-            }
+        if (!isHandled) {
+            responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
         }
-        if (exchange.getRequestMethod().equals("PUT")) {
-            if (path.matches("^/api/persons/[^/]+$")) {
-                var buffer = new ByteArrayOutputStream();
-                exchange.getRequestBody().transferTo(buffer);
-                var content     = new String(buffer.toByteArray());
-                var inPerson    = new Gson().fromJson(content, Person.class);
-                var outPerson   = personalService.put(inPerson);
-                var outContent  = new Gson().toJson(outPerson);
-                var contentType = extContentTypes.get(".json");
-                responseHttp(exchange, 200, contentType, outContent.getBytes());
-                return;
-            }
-        }
-        if (exchange.getRequestMethod().equals("DELETE")) {
-            if (path.matches("^/api/persons/[^/]+$")) {
-                var personId    = path.replaceAll("^(/api/persons/)([^/]+)$", "$2");
-                var person      = personalService.delete(personId);
-                if (person.isEmpty()) {
-                    responseHttp(exchange, 404, null, "{}".getBytes());
-                } else {
-                    var contentType = extContentTypes.get(".json");
-                    responseHttp(exchange, 200, contentType, "{}".getBytes());
-                }
-                return;
-            }
-        }
-        responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
     }
     
     private void handleFile(String path, HttpExchange exchange) throws IOException {
@@ -187,7 +138,7 @@ public class Server {
         }
     }
     
-    private void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) throws IOException {
+    public static void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) throws IOException {
         try {
             addHeader(exchange, "Cache-Control", "no-cache");
             addHeader(exchange, "Content-Type",  contentType);
@@ -201,7 +152,7 @@ public class Server {
         }
     }
     
-    private void addHeader(HttpExchange exchange, String headerName, String ... contentValues) {
+    public static void addHeader(HttpExchange exchange, String headerName, String ... contentValues) {
         var values = listOf(contentValues).filterNonNull();
         if (!values.isEmpty()) {
             exchange.getResponseHeaders().put(headerName, values);

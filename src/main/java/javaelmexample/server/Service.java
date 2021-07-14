@@ -1,18 +1,20 @@
 package javaelmexample.server;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import functionalj.result.Result;
+import functionalj.stream.StreamPlus;
 
 public interface Service<DATA> {
     
-    public Optional<DATA> get(String id);
+    public Class<DATA> dataClass();
     
-    public Stream<DATA> get();
+    public Result<DATA> get(String id);
     
-    public DATA post(DATA data);
+    public StreamPlus<DATA> list();
     
-    public DATA put(DATA data);
+    public Result<DATA> post(DATA data);
     
-    public Optional<DATA> delete(String id);
+    public Result<DATA> put(String id, DATA data);
+    
+    public Result<DATA> delete(String id);
     
 }

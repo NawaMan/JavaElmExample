@@ -1,6 +1,6 @@
 [
     { "id": "1", "firstName": "Clark", "lastName": "Kent", "nickName": "Superman" },
     { "id": "2", "firstName": "Bruce", "lastName": "Wayne", "nickName": "Batman" },
-    { "id": "3", "firstName": "Diana", "lastName": "Prince", "nickName": "Wonderwoman" },
+    { "id": "3", "firstName": "Diana", "lastName": "Prince", "nickName": "Wonder Woman" },
     { "id": "4", "firstName": "Bruce", "lastName": "Banner", "nickName": "Hulk" }
 ]
