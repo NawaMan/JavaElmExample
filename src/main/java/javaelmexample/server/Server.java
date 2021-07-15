@@ -1,18 +1,9 @@
 package javaelmexample.server;
 
-import static functionalj.function.Func.f;
-import static functionalj.lens.Access.theString;
-import static functionalj.list.FuncList.listOf;
-import static functionalj.map.FuncMap.mapOf;
-import static functionalj.map.FuncMap.newMap;
-import static java.util.Collections.unmodifiableMap;
 import static nullablej.nullable.Nullable.nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,37 +13,9 @@ import java.util.function.Supplier;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import functionalj.types.Struct;
-import javaelmexample.server.services.PersonServiceLoader;
-
 public class Server {
     
     private static final Supplier<? extends ExecutorService> defaultExecutor = Executors::newCachedThreadPool;
-    
-    public static final Map<String, String> extContentTypes 
-                    = unmodifiableMap(
-                        newMap(String.class, String.class)
-                        .with(".icon", "image/x-icon")
-                        .with(".html", "text/html; charset=utf-8")
-                        .with(".htm",  "text/html; charset=utf-8")
-                        .with(".js",   "application/javascript")
-                        .with(".css",  "text/css; charset=utf-8")
-                        .with(".json", "text/json; charset=utf-8")
-                        .with(".yaml", "text/yaml; charset=utf-8")
-                        .with(".yml",  "text/yaml; charset=utf-8")
-                        .with(".jpg",  "image/jpeg")
-                        .with(".jpeg", "image/jpeg")
-                        .with(".png",  "image/png")
-                        .build());
-    
-    @Struct
-    static interface HttpErrorSpec {
-        String error();
-        
-        public default byte[] toBytes() {
-            return JsonUtil.toJson(this).getBytes();
-        }
-    }
     
     private final ExecutorService executor;
     private final int             portNumber;
@@ -65,8 +28,10 @@ public class Server {
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
     
-    @SuppressWarnings("rawtypes")
-    private Map<String, ApiHandler> apiHandlers;
+    private Http        http;
+    private FileHandler fileHandler;
+    private ApiHandler  apiHandler;
+    
     
     public Server(int portNumber) {
         this(portNumber, null, null);
@@ -75,13 +40,11 @@ public class Server {
         this(portNumber, basePath, null);
     }
     public Server(int portNumber, String basePath, ExecutorService executor) {
+        this.portNumber  = portNumber;
         this.basePath    = nullable(basePath).orElse   ("/");
         this.executor    = nullable(executor).orElseGet(defaultExecutor);
-        this.portNumber  = portNumber;
-        
-        this.apiHandlers 
-                = mapOf("persons", PersonServiceLoader.load("data/persons.json"))
-                .mapValue(ApiHandler::new);
+        this.fileHandler = new FileHandler();
+        this.apiHandler  = new ApiHandler();
     }
     
     public void start() throws IOException {
@@ -113,79 +76,17 @@ public class Server {
     private void handle(HttpExchange exchange) throws IOException {
         try {
             var path = exchange.getRequestURI().getPath();
-            if (path.isEmpty() || path.equals(basePath)) {
-                path = basePath + "index.html";
-            }
-            
             if (path.startsWith("/api/")) {
-                handleApi(path, exchange);
+                apiHandler.handleApi(path, exchange);
             } else {
-                handleFile(path, exchange);
+                fileHandler.handleFile(path, exchange);
             }
         } catch (IllegalArgumentException exception) {
-            var error = new HttpError(exception.getMessage());
-            responseHttp(exchange, 400, null, error.toBytes());
+            http.responseError(exchange, 400, exception);
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {
-            var error = new HttpError(exception.getMessage());
-            responseHttp(exchange, 500, null, error.toBytes());
-        }
-    }
-    
-    private void handleApi(String path, HttpExchange exchange) throws IOException {
-        var pathParts 
-                = listOf(path.split("/"))
-                .filter(theString.thatIsNotBlank())
-                .skip(/*`api`*/1)
-                .toFuncList();
-        
-        var firstPath = pathParts.first();
-        var tailPath  = pathParts.skip(1);
-        
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        var isHandled 
-                = firstPath.map(apiHandlers::get)
-                .map(f((ApiHandler handler) -> handler.handle(tailPath, exchange)))
-                .orElse(false);
-        if (!isHandled) {
-            responseHttp(exchange, 404, null, ("Not found: " + path).getBytes());
-        }
-    }
-    
-    private void handleFile(String path, HttpExchange exchange) throws IOException {
-        var pathExtension = path.replaceAll("^(.*)(\\.[^.]+)$", "$2");
-        var contentType   = extContentTypes.get(pathExtension);
-        addHeader(exchange, "Content-Type",  contentType);
-        
-        var resource = Server.class.getClassLoader().getResourceAsStream("./" + path);
-        if (resource != null) {
-            var buffer = new ByteArrayOutputStream();
-            resource.transferTo(buffer);
-            responseHttp(exchange, 200, null, buffer.toByteArray());
-        } else {
-            responseHttp(exchange, 404, null, ("File not found: " + path).getBytes());
-        }
-    }
-    
-    public static void responseHttp(HttpExchange exchange, int statusCode, String contentType, byte[] contentBody) throws IOException {
-        try {
-            addHeader(exchange, "Cache-Control", "no-cache");
-            addHeader(exchange, "Content-Type",  contentType);
-            
-            exchange.sendResponseHeaders(statusCode, contentBody.length);
-            var inputStream = new ByteArrayInputStream(contentBody);
-            var responseBody = exchange.getResponseBody();
-            inputStream.transferTo(responseBody);
-        } finally {
-            exchange.close();
-        }
-    }
-    
-    public static void addHeader(HttpExchange exchange, String headerName, String ... contentValues) {
-        var values = listOf(contentValues).filterNonNull();
-        if (!values.isEmpty()) {
-            exchange.getResponseHeaders().put(headerName, values);
+            http.responseError(exchange, 500, exception);
         }
     }
     
