@@ -22,7 +22,8 @@ import java.util.function.Supplier;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import javaelmexample.server.services.PersonService;
+import functionalj.types.Struct;
+import javaelmexample.server.services.PersonServiceLoader;
 
 public class Server {
     
@@ -43,6 +44,15 @@ public class Server {
                         .with(".jpeg", "image/jpeg")
                         .with(".png",  "image/png")
                         .build());
+    
+    @Struct
+    static interface HttpErrorSpec {
+        String error();
+        
+        public default byte[] toBytes() {
+            return JsonUtil.toJson(this).getBytes();
+        }
+    }
     
     private final ExecutorService executor;
     private final int             portNumber;
@@ -70,7 +80,7 @@ public class Server {
         this.portNumber  = portNumber;
         
         this.apiHandlers 
-                = mapOf("persons", PersonService.create("data/persons.json"))
+                = mapOf("persons", PersonServiceLoader.load("data/persons.json"))
                 .mapValue(ApiHandler::new);
     }
     
@@ -101,15 +111,25 @@ public class Server {
     }
     
     private void handle(HttpExchange exchange) throws IOException {
-        var path = exchange.getRequestURI().getPath();
-        if (path.isEmpty() || path.equals(basePath)) {
-            path = basePath + "index.html";
-        }
-        
-        if (path.startsWith("/api/")) {
-            handleApi(path, exchange);
-        } else {
-            handleFile(path, exchange);
+        try {
+            var path = exchange.getRequestURI().getPath();
+            if (path.isEmpty() || path.equals(basePath)) {
+                path = basePath + "index.html";
+            }
+            
+            if (path.startsWith("/api/")) {
+                handleApi(path, exchange);
+            } else {
+                handleFile(path, exchange);
+            }
+        } catch (IllegalArgumentException exception) {
+            var error = new HttpError(exception.getMessage());
+            responseHttp(exchange, 400, null, error.toBytes());
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            var error = new HttpError(exception.getMessage());
+            responseHttp(exchange, 500, null, error.toBytes());
         }
     }
     

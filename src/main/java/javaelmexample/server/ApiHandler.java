@@ -1,5 +1,6 @@
 package javaelmexample.server;
 
+import static functionalj.list.FuncList.listOf;
 import static javaelmexample.server.JsonUtil.fromJson;
 import static javaelmexample.server.JsonUtil.toJson;
 import static javaelmexample.server.Server.extContentTypes;
@@ -25,45 +26,57 @@ public class ApiHandler<T> {
                     FuncList<String> paths, 
                     HttpExchange     exchange) 
                     throws IOException {
-        var serviceData = service.dataClass();
-        
-        if (exchange.getRequestMethod().equals("GET")) {
-            if (paths.isEmpty()) {
-                var result = service.list().getResult();
-                responseResult(exchange, result.get());
-                return true;
+        try {
+            var serviceData = service.dataClass();
+            
+            if (exchange.getRequestMethod().equals("GET")) {
+                if (paths.isEmpty()) {
+                    var result = service.list().getResult();
+                    responseResult(exchange, result.get());
+                    return true;
+                }
+                if (paths.size() == 1) {
+                    var itemId = paths.first().get();
+                    var item   = service.get(itemId);
+                    responsePromise(exchange, itemId, item);
+                    return true;
+                }
             }
-            if (paths.size() == 1) {
-                var itemId = paths.first().get();
-                var item   = service.get(itemId);
-                responsePromise(exchange, item);
-                return true;
+            if (exchange.getRequestMethod().equals("POST")) {
+                if (paths.size() == 0) {
+                    var inItem  = extractBody(exchange, serviceData);
+                    var outItem = service.post(inItem);
+                    responsePromise(exchange, null, outItem);
+                    return true;
+                }
             }
-        }
-        if (exchange.getRequestMethod().equals("POST")) {
-            if (paths.size() == 0) {
-                var inItem  = extractBody(exchange, serviceData);
-                var outItem = service.post(inItem);
-                responsePromise(exchange, outItem);
-                return true;
+            if (exchange.getRequestMethod().equals("PUT")) {
+                if (paths.size() == 1) {
+                    var itemId  = paths.first().get();
+                    var inItem  = extractBody(exchange, serviceData);
+                    var outItem = service.put(itemId, inItem);
+                    responsePromise(exchange, itemId, outItem);
+                    return true;
+                }
             }
-        }
-        if (exchange.getRequestMethod().equals("PUT")) {
-            if (paths.size() == 1) {
-                var itemId  = paths.first().get();
-                var inItem  = extractBody(exchange, serviceData);
-                var outItem = service.put(itemId, inItem);
-                responsePromise(exchange, outItem);
-                return true;
+            if (exchange.getRequestMethod().equals("DELETE")) {
+                if (paths.size() == 1) {
+                    var itemId = paths.first().get();
+                    var item   = service.delete(itemId);
+                    responsePromise(exchange, itemId, item);
+                    return true;
+                }
             }
-        }
-        if (exchange.getRequestMethod().equals("DELETE")) {
-            if (paths.size() == 1) {
-                var itemId = paths.first().get();
-                var item   = service.delete(itemId);
-                responsePromise(exchange, item);
-                return true;
-            }
+        } catch (IllegalArgumentException exception) {
+            var error = new HttpError(exception.getMessage());
+            responseHttp(exchange, 400, null, error.toBytes());
+            return true;
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            var error = new HttpError(exception.getMessage());
+            responseHttp(exchange, 500, null, error.toBytes());
+            return true;
         }
         return false;
     }
@@ -83,13 +96,14 @@ public class ApiHandler<T> {
         responseHttp(exchange, 200, contentType, json.getBytes());
     }
     
-    private void responsePromise(HttpExchange exchange, Promise<T> promise) throws IOException {
+    private void responsePromise(HttpExchange exchange, String description, Promise<T> promise) throws IOException {
 //        var result = promise.getResult(timeout, timeUnit);
         var result = promise.getResult();
         if (result.isPresent()) {
             responseResult(exchange, result.get());
         } else if (result.isNull()) {
-            responseHttp(exchange, 404, null, "{}".getBytes());
+            var error = new HttpError(listOf("Not found", description).join(": "));
+            responseHttp(exchange, 404, null, error.toBytes());
         } else {
             // TODO - Handle this based on what the exception is.
             result.orThrowRuntimeException();
