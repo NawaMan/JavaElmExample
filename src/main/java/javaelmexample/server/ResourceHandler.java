@@ -31,16 +31,17 @@ public class ResourceHandler {
         
         var pathExtension = path.replaceAll("^(.*)(\\.[^.]+)$", "$2");
         var contentType   = extContentTypes.get(pathExtension);
+        var response      = http.responseOf(exchange);
         if (contentType == null) {
-            http.responseError(exchange, 401, "Not allowed: " + path);
+            response.responseError(401, "Not allowed: " + path);
         } else {
             var resource = Server.class.getClassLoader().getResourceAsStream("./" + path);
             if (resource != null) {
                 var buffer = new ByteArrayOutputStream();
                 resource.transferTo(buffer);
-                http.responseBytes(exchange, 200, contentType, buffer.toByteArray());
+                response.responseBytes(200, contentType, buffer.toByteArray());
             } else {
-                http.responseError(exchange, 404, "File not found: " + path);
+                response.responseError(404, "File not found: " + path);
             }
         }
     }

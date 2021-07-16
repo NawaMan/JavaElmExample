@@ -3,13 +3,17 @@ package javaelmexample.server;
 import static functionalj.list.FuncList.listOf;
 import static functionalj.map.FuncMap.newMap;
 import static java.util.Collections.unmodifiableMap;
+import static javaelmexample.server.JsonUtil.fromJson;
+import static javaelmexample.server.JsonUtil.toJson;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import functionalj.promise.Promise;
 import functionalj.types.Struct;
 
 public class Http {
@@ -39,50 +43,94 @@ public class Http {
         }
     }
     
-    public void responseError(
-                    HttpExchange exchange, 
-                    int          statusCode, 
-                    Throwable    throwable) 
-                        throws IOException {
-        responseError(exchange, statusCode, throwable.getMessage());
-    }
-    
-    public void responseError(
-                    HttpExchange exchange, 
-                    int          statusCode, 
-                    String       errorMessage) 
-                        throws IOException {
-        var error = new HttpError(errorMessage);
-        responseBytes(exchange, 500, null, error.toBytes());
-    }
-    
-    public void responseBytes(
-                    HttpExchange exchange, 
-                    int          statusCode, 
-                    String       contentType, 
-                    byte[]       contentBody) 
-                        throws IOException {
-        try {
-            addHeader(exchange, "Cache-Control", "no-cache");
-            addHeader(exchange, "Content-Type",  contentType);
-            
-            exchange.sendResponseHeaders(statusCode, contentBody.length);
-            var inputStream = new ByteArrayInputStream(contentBody);
-            var responseBody = exchange.getResponseBody();
-            inputStream.transferTo(responseBody);
-        } finally {
-            exchange.close();
+    @Struct
+    static interface ResponseSpec {
+        
+        HttpExchange exchange();
+        
+        default void withError(
+                        int          statusCode, 
+                        Throwable    throwable) 
+                            throws IOException {
+            responseError(statusCode, throwable.getMessage());
+        }
+        
+        default void responseError(
+                        int          statusCode, 
+                        String       errorMessage) 
+                            throws IOException {
+            var error = new HttpError(errorMessage);
+            responseBytes(500, null, error.toBytes());
+        }
+        
+        default void responseBytes(
+                        int          statusCode, 
+                        String       contentType, 
+                        byte[]       contentBody) 
+                            throws IOException {
+            var exchange = exchange();
+            try {
+                addHeader("Cache-Control", "no-cache");
+                addHeader("Content-Type",  contentType);
+                
+                exchange.sendResponseHeaders(statusCode, contentBody.length);
+                var inputStream = new ByteArrayInputStream(contentBody);
+                var responseBody = exchange.getResponseBody();
+                inputStream.transferTo(responseBody);
+            } finally {
+                exchange.close();
+            }
+        }
+        
+        default <D> void withResult(D result) throws IOException {
+            var json        = toJson(result);
+            var contentType = extContentTypes.get(".json");
+            responseBytes(200, contentType, json.getBytes());
+        }
+        
+        default void addHeader(
+                        String       headerName, 
+                        String ...   contentValues) {
+            var values = listOf(contentValues).filterNonNull();
+            if (!values.isEmpty()) {
+                var exchange = exchange();
+                exchange.getResponseHeaders().put(headerName, values);
+            }
+        }
+        
+        default <D> void withPromise(String description, Promise<D> promise) throws IOException {
+//            var result = promise.getResult(timeout, timeUnit);
+            var result = promise.getResult();
+            if (result.isPresent()) {
+                withResult(result.get());
+            } else if (result.isNull()) {
+                var errorMsg = listOf("Not found", description).filterNonNull().join(": ");
+                responseError(404, errorMsg);
+            } else {
+                // TODO - Handle this based on what the exception is.
+                result.orThrowRuntimeException();
+            }
         }
     }
     
-    public void addHeader(
-                    HttpExchange exchange, 
-                    String       headerName, 
-                    String ...   contentValues) {
-        var values = listOf(contentValues).filterNonNull();
-        if (!values.isEmpty()) {
-            exchange.getResponseHeaders().put(headerName, values);
-        }
+    public Response responseOf(HttpExchange exchange) {
+        return new Response(exchange);
+    }
+    
+    public byte[] extractBodyBytes(HttpExchange exchange) throws IOException {
+        var buffer = new ByteArrayOutputStream();
+        exchange.getRequestBody().transferTo(buffer);
+        return buffer.toByteArray();
+    }
+    
+    public String extractBodyText(HttpExchange exchange) throws IOException {
+        var buffer = extractBodyBytes(exchange);
+        return new String(buffer);
+    }
+    
+    public <T> T extractBody(HttpExchange exchange, Class<T> serviceData) throws IOException {
+        var content = extractBodyText(exchange);
+        return fromJson(content, serviceData);
     }
     
 }

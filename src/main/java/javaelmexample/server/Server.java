@@ -60,23 +60,24 @@ public class Server {
     }
     
     private void handle(HttpExchange exchange) throws IOException {
+        var response = http.responseOf(exchange);
         try {
             var path = exchange.getRequestURI().getPath();
             if (path.startsWith("/api/")) {
                 var pathParts = listOf(path.split("/")).filter(theString.thatIsNotBlank()).skip(/*`api`*/1);
                 var isHandled = apiHandler.handleApi(pathParts, exchange);
                 if (!isHandled) {
-                    http.responseError(exchange, 404, "Not found: " + path);
+                    response.responseError(404, "Not found: " + path);
                 }
             } else {
                 fileHandler.handleFile(path, exchange);
             }
         } catch (IllegalArgumentException exception) {
-            http.responseError(exchange, 400, exception);
+            response.withError(400, exception);
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {
-            http.responseError(exchange, 500, exception);
+            response.withError(500, exception);
         }
     }
     
