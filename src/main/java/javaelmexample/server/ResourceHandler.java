@@ -7,18 +7,25 @@ import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class FileHandler {
+/**
+ * Handler for file in the resources.
+ **/
+public class ResourceHandler {
     
     private final Http http;
     
-    public FileHandler() {
+    public ResourceHandler() {
         this.http = new Http();
     }
     
+    /**
+     * Given the path, handle the file associated to the path.
+     **/
     public void handleFile(String path, HttpExchange exchange) throws IOException {
         if (path.isEmpty()) {
-            path = "/index.html";
-        } else if (path.endsWith("/")) {
+            path = "/";
+        }
+        if (path.endsWith("/")) {
             path = path + "index.html";
         }
         
@@ -27,12 +34,11 @@ public class FileHandler {
         if (contentType == null) {
             http.responseError(exchange, 401, "Not allowed: " + path);
         } else {
-            http.addHeader(exchange, "Content-Type",  contentType);
             var resource = Server.class.getClassLoader().getResourceAsStream("./" + path);
             if (resource != null) {
                 var buffer = new ByteArrayOutputStream();
                 resource.transferTo(buffer);
-                http.responseBytes(exchange, 200, null, buffer.toByteArray());
+                http.responseBytes(exchange, 200, contentType, buffer.toByteArray());
             } else {
                 http.responseError(exchange, 404, "File not found: " + path);
             }

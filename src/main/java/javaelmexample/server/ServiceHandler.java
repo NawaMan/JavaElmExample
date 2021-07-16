@@ -16,11 +16,11 @@ import functionalj.promise.Promise;
 public class ServiceHandler<T> { 
     
     private final Service<T> service;
-    private final Http httpHelper;
+    private final Http http;
     
     public ServiceHandler(Service<T> service) {
         this.service    = service;
-        this.httpHelper = new Http();
+        this.http = new Http();
     }
     
     public boolean handle(
@@ -69,12 +69,12 @@ public class ServiceHandler<T> {
                 }
             }
         } catch (IllegalArgumentException exception) {
-            httpHelper.responseError(exchange, 400, exception);
+            http.responseError(exchange, 400, exception);
             return true;
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {
-            httpHelper.responseError(exchange, 404, exception);
+            http.responseError(exchange, 404, exception);
             return true;
         }
         return false;
@@ -92,7 +92,7 @@ public class ServiceHandler<T> {
     private <D> void responseResult(HttpExchange exchange, D result) throws IOException {
         var json        = toJson(result);
         var contentType = extContentTypes.get(".json");
-        httpHelper.responseBytes(exchange, 200, contentType, json.getBytes());
+        http.responseBytes(exchange, 200, contentType, json.getBytes());
     }
     
     private void responsePromise(HttpExchange exchange, String description, Promise<T> promise) throws IOException {
@@ -102,7 +102,7 @@ public class ServiceHandler<T> {
             responseResult(exchange, result.get());
         } else if (result.isNull()) {
             var errorMsg = listOf("Not found", description).filterNonNull().join(": ");
-            httpHelper.responseError(exchange, 404, errorMsg);
+            http.responseError(exchange, 404, errorMsg);
         } else {
             // TODO - Handle this based on what the exception is.
             result.orThrowRuntimeException();
