@@ -3,20 +3,24 @@ package javaelmexample.server;
 import static functionalj.list.FuncList.listOf;
 import static functionalj.map.FuncMap.newMap;
 import static java.util.Collections.unmodifiableMap;
-import static javaelmexample.server.JsonUtil.fromJson;
-import static javaelmexample.server.JsonUtil.toJson;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 
 import functionalj.promise.Promise;
 import functionalj.types.Struct;
 
 public class Http {
+    
+    private static final ThreadLocal<Gson> gson = ThreadLocal.withInitial(() -> new Gson());
+    
+    public static final int timeout = 30;
     
     public static final Map<String, String> extContentTypes 
                     = unmodifiableMap(
@@ -27,8 +31,6 @@ public class Http {
                         .with(".js",   "application/javascript")
                         .with(".css",  "text/css; charset=utf-8")
                         .with(".json", "text/json; charset=utf-8")
-                        .with(".yaml", "text/yaml; charset=utf-8")
-                        .with(".yml",  "text/yaml; charset=utf-8")
                         .with(".jpg",  "image/jpeg")
                         .with(".jpeg", "image/jpeg")
                         .with(".png",  "image/png")
@@ -39,13 +41,13 @@ public class Http {
         String error();
         
         public default byte[] toBytes() {
-            return JsonUtil.toJson(this).getBytes();
+            return toJson(this).getBytes();
         }
     }
     
     @Struct
     static interface ResponseSpec {
-        
+
         HttpExchange exchange();
         
         default void withError(
@@ -99,8 +101,7 @@ public class Http {
         }
         
         default <D> void withPromise(String description, Promise<D> promise) throws IOException {
-//            var result = promise.getResult(timeout, timeUnit);
-            var result = promise.getResult();
+            var result = promise.getResult(timeout, TimeUnit.SECONDS);
             if (result.isPresent()) {
                 withResult(result.get());
             } else if (result.isNull()) {
@@ -131,6 +132,14 @@ public class Http {
     public <T> T extractBody(HttpExchange exchange, Class<T> serviceData) throws IOException {
         var content = extractBodyText(exchange);
         return fromJson(content, serviceData);
+    }
+    
+    private static <T> T fromJson(String json, Class<T> clss) {
+        return gson.get().fromJson(json, clss);
+    }
+    
+    private static <T> String toJson(T object) {
+        return gson.get().toJson(object);
     }
     
 }
