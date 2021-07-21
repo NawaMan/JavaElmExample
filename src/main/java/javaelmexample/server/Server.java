@@ -145,6 +145,9 @@ public class Server {
         if (path.endsWith("/")) {
             path = path + "index.html";
         }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
         
         var pathExtension = path.replaceAll("^(.*)(\\.[^.]+)$", "$2");
         var contentType   = extContentTypes.get(pathExtension);
@@ -152,7 +155,7 @@ public class Server {
         if (contentType == null) {
             response.responseError(401, "Not allowed: " + path);
         } else {
-            var resource = Server.class.getClassLoader().getResourceAsStream("./" + path);
+            var resource = Server.class.getClassLoader().getResourceAsStream(path);
             if (resource != null) {
                 var buffer = new ByteArrayOutputStream();
                 resource.transferTo(buffer);

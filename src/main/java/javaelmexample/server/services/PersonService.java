@@ -34,7 +34,7 @@ public class PersonService implements Service<Person> {
         var service = new PersonService();
         
         try {
-            var resource = Server.class.getClassLoader().getResourceAsStream("./" + initialDataPath);
+            var resource = Server.class.getClassLoader().getResourceAsStream(initialDataPath);
             var buffer = new ByteArrayOutputStream();
             resource.transferTo(buffer);
             var content = new String(buffer.toByteArray());
