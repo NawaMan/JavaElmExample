@@ -16,6 +16,9 @@ import com.sun.net.httpserver.HttpExchange;
 import functionalj.promise.Promise;
 import functionalj.types.Struct;
 
+/**
+ * This class is a help class to deal with Http such as to read and write the request and response.
+ */
 public class Http {
     
     private static final ThreadLocal<Gson> gson = ThreadLocal.withInitial(() -> new Gson());
@@ -47,29 +50,19 @@ public class Http {
     
     @Struct
     static interface ResponseSpec {
-
+        
         HttpExchange exchange();
         
-        default void withError(
-                        int          statusCode, 
-                        Throwable    throwable) 
-                            throws IOException {
+        default void withError(int statusCode, Throwable throwable) throws IOException {
             responseError(statusCode, throwable.getMessage());
         }
         
-        default void responseError(
-                        int          statusCode, 
-                        String       errorMessage) 
-                            throws IOException {
+        default void responseError(int statusCode, String errorMessage) throws IOException {
             var error = new HttpError(errorMessage);
             responseBytes(500, null, error.toBytes());
         }
         
-        default void responseBytes(
-                        int          statusCode, 
-                        String       contentType, 
-                        byte[]       contentBody) 
-                            throws IOException {
+        default void responseBytes(int statusCode, String contentType, byte[] contentBody) throws IOException {
             var exchange = exchange();
             try {
                 addHeader("Cache-Control", "no-cache");
@@ -90,9 +83,7 @@ public class Http {
             responseBytes(200, contentType, json.getBytes());
         }
         
-        default void addHeader(
-                        String       headerName, 
-                        String ...   contentValues) {
+        default void addHeader(String headerName, String ... contentValues) {
             var values = listOf(contentValues).filterNonNull();
             if (!values.isEmpty()) {
                 var exchange = exchange();

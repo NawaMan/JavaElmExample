@@ -6,12 +6,15 @@ import com.sun.net.httpserver.HttpExchange;
 
 import functionalj.list.FuncList;
 
+/**
+ * This class acts as an adapter between HTTP to REST by handling the HTTP request and call associated REST methods.
+ **/
 public class ServiceHandler<T> { 
     
-    private final Service<T> service;
+    private final RestService<T> service;
     private final Http       http;
     
-    public ServiceHandler(Service<T> service) {
+    public ServiceHandler(RestService<T> service) {
         this.service = service;
         this.http    = new Http();
     }

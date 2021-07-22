@@ -7,6 +7,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>JavaElmExample</name>
     
+    <properties>
+        <functionalj.version>0.5.4.0</functionalj.version>
+        <gson.version>2.8.7</gson.version>
+        <exec.mainClass>javaelmexample.mains.Main</exec.mainClass>
+    </properties>
+    
     <build>
         <pluginManagement>
             <plugins>
@@ -18,14 +24,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.6</version>
-                <configuration>
-                    <mainClass>javaelmexample.mains.GuiMain</mainClass>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -60,6 +58,37 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>${exec.mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                    <finalName>JavaElmExample</finalName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <minimizeJar>true</minimizeJar>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencyManagement>
@@ -78,21 +107,29 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.functionalj</groupId>
-            <artifactId>functionalj-all</artifactId>
-            <version>0.5.4.0</version>
+            <artifactId>functionalj-core</artifactId>
+            <version>${functionalj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.functionalj</groupId>
+            <artifactId>functionalj-types</artifactId>
+            <version>${functionalj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.functionalj</groupId>
+            <artifactId>functionalj-elm</artifactId>
+            <version>${functionalj.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>15.0.1</version>
+            <version>${gson.version}</version>
         </dependency>
     </dependencies>
+    
 </project>

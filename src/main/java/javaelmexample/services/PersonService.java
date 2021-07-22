@@ -1,4 +1,4 @@
-package javaelmexample.server.services;
+package javaelmexample.services;
 
 import static java.lang.Math.abs;
 import static java.lang.String.format;
@@ -20,9 +20,12 @@ import functionalj.types.Nullable;
 import functionalj.types.Struct;
 import functionalj.types.elm.Elm;
 import javaelmexample.server.Server;
-import javaelmexample.server.Service;
+import javaelmexample.server.RestService;
 
-public class PersonService implements Service<Person> {
+/**
+ * This is an example Rest service that deal with a Person objects.
+ **/
+public class PersonService implements RestService<Person> {
     
     @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
     void Person(@Nullable String id, String firstName, String lastName, @Nullable String nickName) {}
@@ -54,8 +57,11 @@ public class PersonService implements Service<Person> {
     
     //== Instance ==
     
-    private static final Random              random  = new Random();
-    private static final Map<String, Person> persons = new ConcurrentHashMap<>();
+    // TODO - Change to UUID
+    // TODO - Extract this so we can be determenistic
+    private static final Random random = new Random();
+    
+    private final Map<String, Person> persons = new ConcurrentHashMap<>();
     
     public Class<Person> dataClass() {
         return Person.class;

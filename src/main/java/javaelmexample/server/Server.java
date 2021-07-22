@@ -22,6 +22,9 @@ import com.sun.net.httpserver.HttpServer;
 import functionalj.list.FuncList;
 import functionalj.map.FuncMap;
 
+/**
+ * This is a simple HTTP server.
+ */
 public class Server {
     
     private final AtomicBoolean stillRunning = new AtomicBoolean(true);
@@ -38,37 +41,44 @@ public class Server {
     
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Server(int portNumber, Map<String, ? extends Service<?>> services) {
+    public Server(int portNumber, Map<String, ? extends RestService<?>> services) {
         this.portNumber  = portNumber;
         this.executor    = Executors.newCachedThreadPool();
         this.http        = new Http();
         this.apiHandlers = FuncMap.from(services).mapValue(service -> new ServiceHandler(service)).toImmutableMap();
     }
     
+    public boolean isRunning() {
+        return stillRunning.get();
+    }
+    
     public void start() throws IOException {
         if (!stillRunning.get())
             return;
         
-        new Thread(() -> {
+        var address    = new InetSocketAddress("0.0.0.0", portNumber);
+        var httpServer = HttpServer.create(address, 0);
+        httpServer.setExecutor(executor);
+        httpServer.createContext("/", this::handle);
+        httpServer.start();
+        
+        f(()-> {
             try {
-                var address    = new InetSocketAddress("0.0.0.0", portNumber);
-                var httpServer = HttpServer.create(address, 0);
-                httpServer.setExecutor(executor);
-                httpServer.createContext("/", this::handle);
-                
-                try {
-                    httpServer.start();
-                    latch.await();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                } finally {
-                    stillRunning.set(false);
-                    shutdown(httpServer);
-                    executor.shutdown();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                latch.await();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            } finally {
+                stillRunning.set(false);
+                shutdown(httpServer);
+                executor.shutdown();
             }
+        })
+        .async()
+        .onComplete(result -> {
+            result.ifException(exception -> {
+                exception.printStackTrace();
+                latch.countDown();
+            });
         })
         .start();
     }
