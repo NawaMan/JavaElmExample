@@ -6525,6 +6525,14 @@ var $author$project$Main$ToViewing = function (a) {
 	return {$: 'ToViewing', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -6578,13 +6586,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$editPerson = function (data) {
 	var person = data.person;
@@ -6592,7 +6593,10 @@ var $author$project$Main$editPerson = function (data) {
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('editPerson')
+			]),
 		_List_fromArray(
 			[
 				A2(
@@ -6812,7 +6816,10 @@ var $author$project$Main$newPerson = function (data) {
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('newPerson')
+			]),
 		_List_fromArray(
 			[
 				A2(
@@ -6924,7 +6931,10 @@ var $author$project$Main$viewPerson = function (data) {
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('viewPerson')
+			]),
 		_List_fromArray(
 			[
 				A2(

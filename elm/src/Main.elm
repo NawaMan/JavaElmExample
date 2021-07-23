@@ -149,7 +149,7 @@ viewPerson data =
   let person = data.person
       personId = person.id |> withDefault "-"
       personNickName = person.nickName |> withDefault ""
-  in  div []
+  in  div [ class "viewPerson" ]
       [ h2  [] [ text "Person" ]
       , div [] [ span [] [text "ID"],         text personId]
       , div [] [ span [] [text "First name"], text person.firstName ]
@@ -166,7 +166,7 @@ editPerson data =
   let person = data.person
       personId = person.id |> withDefault "-"
       personNickName = person.nickName |> withDefault ""
-  in  div []
+  in  div [ class "editPerson" ]
       [ h2  [] [ text "Edit Person" ]
       , div [] [ span [] [text "ID"],         text personId]
       , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
@@ -181,7 +181,7 @@ newPerson : Data -> Html Msg
 newPerson data =
   let person = data.person
       personNickName = person.nickName |> withDefault ""
-  in  div []
+  in  div [ class "newPerson" ]
       [ h2  [] [ text "New Person" ]
       , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
       , div [] [ span [] [text "Last name"],  input [ value person.lastName,  onInput EditLastName  ] []]

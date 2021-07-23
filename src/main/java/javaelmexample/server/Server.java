@@ -52,9 +52,9 @@ public class Server {
         return stillRunning.get();
     }
     
-    public void start() throws IOException {
+    public boolean start() throws IOException {
         if (!stillRunning.get())
-            return;
+            return false;
         
         var address    = new InetSocketAddress("0.0.0.0", portNumber);
         var httpServer = HttpServer.create(address, 0);
@@ -77,10 +77,12 @@ public class Server {
         .onComplete(result -> {
             result.ifException(exception -> {
                 exception.printStackTrace();
-                latch.countDown();
+                stop();
             });
         })
         .start();
+        
+        return stillRunning.get();
     }
     
     public void stop() {

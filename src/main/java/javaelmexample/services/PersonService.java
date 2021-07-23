@@ -4,14 +4,10 @@ import static java.lang.Math.abs;
 import static java.lang.String.format;
 import static nullablej.nullable.Nullable.nullable;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 
 import functionalj.list.FuncList;
 import functionalj.promise.Promise;
@@ -19,7 +15,7 @@ import functionalj.stream.StreamPlus;
 import functionalj.types.Nullable;
 import functionalj.types.Struct;
 import functionalj.types.elm.Elm;
-import javaelmexample.server.Server;
+import javaelmexample.server.RestData;
 import javaelmexample.server.RestService;
 
 /**
@@ -28,34 +24,13 @@ import javaelmexample.server.RestService;
 public class PersonService implements RestService<Person> {
     
     @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
-    void Person(@Nullable String id, String firstName, String lastName, @Nullable String nickName) {}
-    
-    //== Loader from file ==
-    
-    @SuppressWarnings("unchecked")
-    public static PersonService load(String initialDataPath) {
-        var service = new PersonService();
-        
-        try {
-            var resource = Server.class.getClassLoader().getResourceAsStream(initialDataPath);
-            var buffer = new ByteArrayOutputStream();
-            resource.transferTo(buffer);
-            var content = new String(buffer.toByteArray());
-            var gson    = new Gson();
-            var list    = gson.fromJson(content, JsonArray.class);
-            for (var each : list) {
-                var map    = gson.fromJson(each, Map.class);
-                var person = Person.fromMap(map);
-                service.post(person);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        return service;
+    static interface PersonSpec extends RestData {
+        @Nullable String id();
+                  String firstName();
+                  String lastName();
+        @Nullable String nickName();
     }
     
-    //== Instance ==
     
     // TODO - Change to UUID
     // TODO - Extract this so we can be determenistic

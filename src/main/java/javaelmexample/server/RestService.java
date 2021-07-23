@@ -7,7 +7,7 @@ import functionalj.promise.Promise;
  * This interface provider abstraction to a REST service.
  * The aims is to allow the service to be implemented without dealing with HTTP.
  **/
-public interface RestService<DATA> {
+public interface RestService<DATA extends RestData> {
     
     /** @return  the class of the data that this service serve. */
     public Class<DATA> dataClass();

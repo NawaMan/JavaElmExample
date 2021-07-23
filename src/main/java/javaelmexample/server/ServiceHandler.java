@@ -9,12 +9,12 @@ import functionalj.list.FuncList;
 /**
  * This class acts as an adapter between HTTP to REST by handling the HTTP request and call associated REST methods.
  **/
-public class ServiceHandler<T> { 
+public class ServiceHandler<DATA extends RestData> { 
     
-    private final RestService<T> service;
+    private final RestService<DATA> service;
     private final Http       http;
     
-    public ServiceHandler(RestService<T> service) {
+    public ServiceHandler(RestService<DATA> service) {
         this.service = service;
         this.http    = new Http();
     }

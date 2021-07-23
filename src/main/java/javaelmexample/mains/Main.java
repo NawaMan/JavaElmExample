@@ -10,14 +10,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+
 import functionalj.lens.Access;
 import functionalj.list.FuncList;
-import functionalj.tuple.Tuple3;
+import functionalj.types.Struct;
 import javaelmexample.server.Server;
+import javaelmexample.services.Person;
 import javaelmexample.services.PersonService;
 
 /**
@@ -26,16 +31,7 @@ import javaelmexample.services.PersonService;
 public class Main {
     
     // List of the browser to try on Linux.
-    private static final FuncList<String> browsers = ListOf(
-                    "chromium", 
-                    "firefox", 
-                    "epiphany", 
-                    "mozilla", 
-                    "konqueror", 
-                    "netscape", 
-                    "opera", 
-                    "lynx"
-                    );
+    private static final FuncList<String> browsers = ListOf("chromium", "firefox", "mozilla", "opera");
     
     public static void main(String[] args) throws Exception {
         displayHelpMessage(args);
@@ -43,12 +39,11 @@ public class Main {
         var portNumber  = determinePortNumber(args);
         var openBrowser = streamOf(args).containsNoneOf("--browser=false ");
         
-        var services = mapOf("persons", PersonService.load("data/persons.json"));
+        var services = mapOf("persons", loadPersonService("data/persons.json"));
         var server   = new Server(portNumber, services);
         
-        server.start();
-        
-        if (server.isRunning()) {
+        var isStarted = server.start();
+        if (isStarted) {
             var url = format("http://localhost:%d", portNumber);
             System.out.println(format("Visit `%s`", url) );
             
@@ -113,34 +108,30 @@ public class Main {
             return Optional.empty();
         }
         
-        return streamOf(pomContent)
-                    .map    ($S.split("\n"))
-                    .flatMap(List::stream)
-                    .mapTwo ()
-                    .filter (pair -> pair._1().contains("<name>JavaElmExample</name>"))
-                    .map    (pair -> pair._2())
-                    .map    ($S.trim().replaceAll("^(.*>)(.+)(</.*)$", "$2"))
-                    .findFirst();
+        return streamOf (pomContent)
+                .map    ($S.split("\n"))
+                .flatMap(List::stream)
+                .mapTwo ()
+                .filter (pair -> pair.first().contains("<name>JavaElmExample</name>"))
+                .map    (pair -> pair.second().trim().replaceAll("^(.*>)(.+)(</.*)$", "$2"))
+                .findFirst();
     }
     
     private static boolean attemptOpenBrowser(String url) {
         try {
             var os = System.getProperty("os.name").toLowerCase();
-            var rt = Runtime.getRuntime();
-            if (os.indexOf("win") >= 0) {
+            if (os.contains("win")) {
                 exec("rundll32 url.dll,FileProtocolHandler " + url);
-                return true;
-            } else if (os.indexOf("mac") >= 0) {
+            } else if (os.contains("mac")) {
                 exec("open " + url);
-                return true;
-            } else if (os.indexOf("nix") >=0 || os.indexOf("nux") >=0) {
-                var browsers = defaultBrowserForLinux()
-                             .map   (Main.browsers::prepend)
-                             .orElse(Main.browsers);
-                var cmd = browsers.map($S.concat(" \"" + url + "\"")).join(" || ");
-                rt.exec(new String[] { "sh", "-c", cmd.toString() });
-                return true;
+            } else if (os.contains("nix") || os.contains("nux")) {
+                var browsers = defaultBrowserForLinux().map(Main.browsers::prepend).orElse(Main.browsers);
+                var command  = browsers.map($S.concat(" \"" + url + "\"")).join(" || ");
+                exec("sh", "-c", command.toString());
+            } else {
+                return false;
             }
+            return true;
         } catch (IOException | InterruptedException e) {
             System.err.println("Fail to open the browser! You may continue by open it yourself.");
             e.printStackTrace();
@@ -148,10 +139,13 @@ public class Main {
         return false;
     }
     
+    @Struct
+    void ExecResult(int code, String output) {}
+    
     private static Optional<String> defaultBrowserForLinux() throws IOException, InterruptedException {
         var result = exec("xdg-settings", "get", "default-web-browser");
-        if (result._1() == 0) {
-            var defaultBrowser = result._2().trim();
+        if (result.code == 0) {
+            var defaultBrowser = result.output.trim();
             if (defaultBrowser.endsWith(".desktop")) {
                 return Optional.of(defaultBrowser.replaceAll("\\.desktop$", ""));
             }
@@ -159,23 +153,48 @@ public class Main {
         return Optional.empty();
     }
     
-    private static Tuple3<Integer, String, String> exec(String ... commands) throws IOException, InterruptedException {
+    private static ExecResult exec(String ... commands) throws IOException, InterruptedException {
         var process = Runtime.getRuntime().exec(commands);
         var success = process.waitFor(10, TimeUnit.SECONDS);
-        if (!success) {
-            return Tuple3.of(-1, "", "Timeout after 10 seconds.");
+        if (success) {
+            var code   = process.exitValue();
+            var output = extractStream(process.getInputStream());
+            return new ExecResult(code, output);
+        } else {
+            return new ExecResult(-1, "");
         }
         
-        var code   = process.exitValue();
-        var output = extractStream(process.getInputStream());
-        var error  = extractStream(process.getErrorStream());
-        return Tuple3.of(code, output, error);
     }
     
     private static String extractStream(InputStream inStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         inStream.transferTo(buffer);
         return new String(buffer.toByteArray());
+    }
+    
+    //== Loader Persons from file ==
+    
+    @SuppressWarnings("unchecked")
+    static PersonService loadPersonService(String initialDataPath) {
+        var service = new PersonService();
+        
+        try {
+            var resource = Server.class.getClassLoader().getResourceAsStream(initialDataPath);
+            var buffer = new ByteArrayOutputStream();
+            resource.transferTo(buffer);
+            var content = new String(buffer.toByteArray());
+            var gson    = new Gson();
+            var list    = gson.fromJson(content, JsonArray.class);
+            for (var each : list) {
+                var map    = gson.fromJson(each, Map.class);
+                var person = Person.fromMap(map);
+                service.post(person);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return service;
     }
     
 }
