@@ -1,18 +1,18 @@
 package javaelmexample.services;
 
-import static java.lang.Math.abs;
 import static java.lang.String.format;
 import static nullablej.nullable.Nullable.nullable;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import functionalj.list.FuncList;
 import functionalj.promise.Promise;
 import functionalj.stream.StreamPlus;
 import functionalj.types.Nullable;
+import functionalj.types.Required;
 import functionalj.types.Struct;
 import functionalj.types.elm.Elm;
 import javaelmexample.server.RestData;
@@ -26,15 +26,13 @@ public class PersonService implements RestService<Person> {
     @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
     static interface PersonSpec extends RestData {
         @Nullable String id();
-                  String firstName();
-                  String lastName();
+        @Required String firstName();
+        @Required String lastName();
         @Nullable String nickName();
     }
     
     
-    // TODO - Change to UUID
     // TODO - Extract this so we can be determenistic
-    private static final Random random = new Random();
     
     private final Map<String, Person> persons = new ConcurrentHashMap<>();
     
@@ -61,7 +59,7 @@ public class PersonService implements RestService<Person> {
             return Promise.ofValue(null);
         }
         
-        var newPersonId = nullable(person.id).orElseGet(()->abs(random.nextInt()) + "");
+        var newPersonId = nullable(person.id).orElseGet(()->UUID.randomUUID().toString());
         var newPerson   = person.withId(newPersonId);
         persons.put(newPersonId, newPerson);
         return Promise.ofValue(newPerson);
