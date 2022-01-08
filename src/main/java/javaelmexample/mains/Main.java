@@ -37,7 +37,7 @@ public class Main {
         displayHelpMessage(args);
         
         var portNumber  = determinePortNumber(args);
-        var openBrowser = streamOf(args).containsNoneOf("--browser=false ");
+        var openBrowser = streamOf(args).containsNoneOf("--browser=false");
         
         var services = mapOf("persons", loadPersonService("data/persons.json"));
         var server   = new Server(portNumber, services);
@@ -52,6 +52,7 @@ public class Main {
                 attemptOpenBrowser(url + "?pid=" + pid);
             }
             
+            System.out.println();
             System.out.println("Press 'ENTER' to exit ...");
             try (var scanner = new Scanner(System.in)) {
                 scanner.nextLine();
@@ -86,7 +87,7 @@ public class Main {
             System.exit(code);
         }
     }
-
+    
     private static int determinePortNumber(String[] args) {
         return streamOf(args)
                 .filter   ($S.thatMatches("^--port=[0-9]+$"))
@@ -121,10 +122,16 @@ public class Main {
         try {
             var os = System.getProperty("os.name").toLowerCase();
             if (os.contains("win")) {
+                System.out.println();
+                System.out.println("Open in browser...");
                 exec("rundll32 url.dll,FileProtocolHandler " + url);
             } else if (os.contains("mac")) {
-                exec("open " + url);
-            } else if (os.contains("nix") || os.contains("nux")) {
+                System.out.println();
+                System.out.println("Open in browser...");
+                exec("/usr/bin/open", url);
+            } else if (os.contains("mac") || os.contains("nix") || os.contains("nux")) {
+                System.out.println();
+                System.out.println("Open in browser...");
                 var browsers = defaultBrowserForLinux().map(Main.browsers::prepend).orElse(Main.browsers);
                 var command  = browsers.map($S.concat(" \"" + url + "\"")).join(" || ");
                 exec("sh", "-c", command.toString());
