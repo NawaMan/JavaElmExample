@@ -111,12 +111,7 @@
         </dependency>
         <dependency>
             <groupId>io.functionalj</groupId>
-            <artifactId>functionalj-core</artifactId>
-            <version>${functionalj.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.functionalj</groupId>
-            <artifactId>functionalj-types</artifactId>
+            <artifactId>functionalj-all</artifactId>
             <version>${functionalj.version}</version>
         </dependency>
         <dependency>

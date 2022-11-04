@@ -32,8 +32,6 @@ public class PersonService implements RestService<Person> {
     }
     
     
-    // TODO - Extract this so we can be determenistic
-    
     private final Map<String, Person> persons = new ConcurrentHashMap<>();
     
     public Class<Person> dataClass() {

@@ -25,3 +25,5 @@ captures/
 output.json 
 /target/
 /.apt_generated/
+
+elm/node_modules/
