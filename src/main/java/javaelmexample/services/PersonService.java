@@ -24,7 +24,7 @@ import javaelmexample.server.RestService;
 public class PersonService implements RestService<Person> {
     
     @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
-    static interface PersonSpec extends RestData {
+    static interface PersonModel extends RestData {
         @Nullable String id();
         @Required String firstName();
         @Required String lastName();
@@ -66,7 +66,7 @@ public class PersonService implements RestService<Person> {
     @Override
     public Promise<Person> put(String id, Person person) {
         if (person == null) {
-            return null;
+            return Promise.ofValue(null);
         }
         if (!Objects.equals(id, person.id)) {
             var errorMessage = format("ID mismatch: id=[%s] vs item.id=[%s]", id, person.id);
