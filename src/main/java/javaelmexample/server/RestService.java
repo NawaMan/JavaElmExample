@@ -13,19 +13,30 @@ public interface RestService<DATA extends RestData> {
     public Class<DATA> dataClass();
     
     /** Get the data by its ID. */
-    public Promise<DATA> get(String id);
+    public default Promise<DATA> get(String id) {
+        throw new UnsupportedHttpMethodException();
+    }
     
     // TODO - add filter.
+    
     /** Get list of all data */
-    public Promise<FuncList<DATA>> list();
+    public default Promise<FuncList<DATA>> list() {
+        throw new UnsupportedHttpMethodException();
+    }
     
     /** Add a new data and @return that data */
-    public Promise<DATA> post(DATA data);
+    public default Promise<DATA> post(DATA data) {
+        throw new UnsupportedHttpMethodException();
+    }
     
     /** Replace an existing data and @return that data. */
-    public Promise<DATA> put(String id, DATA data);
+    public default Promise<DATA> put(String id, DATA data) {
+        throw new UnsupportedHttpMethodException();
+    }
     
     /** Delete an existing data and @return that data. */
-    public Promise<DATA> delete(String id);
+    public default Promise<DATA> delete(String id) {
+        throw new UnsupportedHttpMethodException();
+    }
     
 }

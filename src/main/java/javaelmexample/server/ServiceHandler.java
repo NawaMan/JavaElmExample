@@ -66,6 +66,9 @@ public class ServiceHandler<DATA extends RestData> {
                     return true;
                 }
             }
+        } catch (UnsupportedHttpMethodException e) {
+            methodNotSupported(method, paths, response);
+            return true;
         } catch (IllegalArgumentException exception) {
             response.withError(400, exception);
             return true;
@@ -75,7 +78,13 @@ public class ServiceHandler<DATA extends RestData> {
             response.withError(404, exception);
             return true;
         }
+        methodNotSupported(method, paths, response);
         return false;
+    }
+    
+    private void methodNotSupported(String method, FuncList<String> paths, Response response) throws IOException {
+        var path = paths.join("/");
+        response.responseError(405, "HTTP Error 405 – Method Not Allowed: " + method + ":" + path);
     }
     
 }

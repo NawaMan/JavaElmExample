@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 
 import functionalj.promise.Promise;
+import functionalj.result.Result;
 import functionalj.types.Struct;
 
 /**
@@ -92,7 +93,9 @@ public class Http {
         }
         
         default <D> void withPromise(String description, Promise<D> promise) throws IOException {
-            var result = promise.getResult(timeout, TimeUnit.SECONDS);
+            var result = (promise == null)
+                       ? Result.ofNull()
+                       : promise.getResult(timeout, TimeUnit.SECONDS);
             if (result.isPresent()) {
                 withResult(result.get());
             } else if (result.isNull()) {
