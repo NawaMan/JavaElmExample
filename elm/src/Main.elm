@@ -44,6 +44,7 @@ type Msg
   | EditFirstName String
   | EditLastName  String
   | EditNickName  String
+  | EditCapeColor String
 
 emptyPerson : Person
 emptyPerson = Person Nothing "" "" Nothing None
@@ -52,8 +53,8 @@ init : () -> (Model, Cmd Msg)
 init _ = (Loading, loadPersons)
 
 
-changeField : Model -> Maybe String -> Maybe String -> Maybe String -> (Model, Cmd Msg)
-changeField model firstName lastName nickName = 
+changeField : Model -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> (Model, Cmd Msg)
+changeField model firstName lastName nickName capeColor = 
       case model of
         Display data -> 
               ((Display 
@@ -64,7 +65,13 @@ changeField model firstName lastName nickName =
                     (firstName |> withDefault data.person.firstName) 
                     (lastName  |> withDefault data.person.lastName) 
                     (Just (nickName |> withDefault (data.person.nickName |> withDefault "")))
-                    None
+                    (
+                      (case capeColor of
+                        Nothing    -> None
+                        Just ""    -> None
+                        Just color -> Color color
+                      )
+                    )
                   )
                   data.mode
                 )
@@ -101,9 +108,10 @@ update msg model =
     ToAdding  data -> (Display (Data data.persons emptyPerson Adding),  Cmd.none)
     ToEditing data -> (Display (Data data.persons data.person Editing), Cmd.none)
 
-    EditFirstName firstName -> (changeField model (Just firstName)  Nothing         Nothing)
-    EditLastName  lastName  -> (changeField model  Nothing         (Just lastName)  Nothing)
-    EditNickName  nickName  -> (changeField model  Nothing          Nothing        (Just nickName))
+    EditFirstName firstName -> (changeField model (Just firstName)  Nothing         Nothing        Nothing)
+    EditLastName  lastName  -> (changeField model  Nothing         (Just lastName)  Nothing        Nothing)
+    EditNickName  nickName  -> (changeField model  Nothing          Nothing        (Just nickName) Nothing)
+    EditCapeColor capeColor -> (changeField model  Nothing          Nothing        Nothing         (Just capeColor))
 
 
 -- SUBSCRIPTIONS
@@ -172,12 +180,16 @@ editPerson data =
   let person = data.person
       personId = person.id |> withDefault "-"
       personNickName = person.nickName |> withDefault ""
+      personCape     = case person.cape of
+                        Color color -> color
+                        None        -> ""
   in  div [ class "editPerson" ]
       [ h2  [] [ text "Edit Person" ]
       , div [] [ span [] [text "ID"],         text personId]
-      , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
-      , div [] [ span [] [text "Last name"],  input [ value person.lastName,  onInput EditLastName  ] []]
-      , div [] [ span [] [text "Nick name"],  input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ span [] [text "First name"],  input [ value person.firstName, onInput EditFirstName ] []]
+      , div [] [ span [] [text "Last name"],   input [ value person.lastName,  onInput EditLastName  ] []]
+      , div [] [ span [] [text "Nick name"],   input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ span [] [text "Cape color"],  input [ value personCape,       onInput EditCapeColor ] []]
       , div [] [ button [ onClick (ChangePerson person) ] [ text "Save" ]
                , button [ onClick (ToViewing    data)   ] [ text "Cancel" ]
                ]
@@ -187,11 +199,15 @@ newPerson : Data -> Html Msg
 newPerson data =
   let person = data.person
       personNickName = person.nickName |> withDefault ""
+      personCape     = case person.cape of
+                        Color color -> color
+                        None        -> ""
   in  div [ class "newPerson" ]
       [ h2  [] [ text "New Person" ]
-      , div [] [ span [] [text "First name"], input [ value person.firstName, onInput EditFirstName ] []]
-      , div [] [ span [] [text "Last name"],  input [ value person.lastName,  onInput EditLastName  ] []]
-      , div [] [ span [] [text "Nick name"],  input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ span [] [text "First name"],  input [ value person.firstName, onInput EditFirstName ] []]
+      , div [] [ span [] [text "Last name"],   input [ value person.lastName,  onInput EditLastName  ] []]
+      , div [] [ span [] [text "Nick name"],   input [ value personNickName,   onInput EditNickName  ] []]
+      , div [] [ span [] [text "Cape color"],  input [ value personCape,       onInput EditCapeColor ] []]
       , div [] [ button [ onClick (AddPerson data.person) ] [ text "Add" ]
                , button [ onClick (ToListing data)        ] [ text "Cancel" ]
                ]

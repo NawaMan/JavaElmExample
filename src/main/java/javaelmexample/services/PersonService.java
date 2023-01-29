@@ -18,11 +18,12 @@ import functionalj.types.Struct;
 import functionalj.types.elm.Elm;
 import javaelmexample.server.RestData;
 import javaelmexample.server.RestService;
+import javaelmexample.server.WithDemoMode;
 
 /**
  * This is an example Rest service that deal with a Person objects.
  **/
-public class PersonService implements RestService<Person> {
+public class PersonService implements RestService<Person>, WithDemoMode {
     
     @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
     static interface PersonModel extends RestData {
@@ -41,11 +42,13 @@ public class PersonService implements RestService<Person> {
     }
     
     
-    private final Map<String, Person> persons = new ConcurrentHashMap<>();
+    private final Map<String, Person> persons  = new ConcurrentHashMap<>();
     
     public Class<Person> dataClass() {
         return Person.class;
     }
+    
+    private final Map<String, Person> snapshot = new ConcurrentHashMap<>();
     
     @Override
     public Promise<Person> get(String id) {
@@ -90,6 +93,19 @@ public class PersonService implements RestService<Person> {
     public Promise<Person> delete(String id) {
         var person = persons.remove(id);
         return Promise.ofValue(person);
+    }
+    
+    //== Demo mode ==
+    
+    @Override
+    public void takeSnapshot() {
+        snapshot.putAll(persons);
+    }
+    
+    @Override
+    public void resetToSnapshot() {
+        persons.clear();
+        persons.putAll(snapshot);
     }
     
 }

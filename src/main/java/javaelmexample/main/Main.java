@@ -9,10 +9,11 @@ import static java.lang.String.format;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
@@ -20,8 +21,10 @@ import com.google.gson.JsonArray;
 
 import functionalj.lens.Access;
 import functionalj.list.FuncList;
+import functionalj.map.ImmutableFuncMap;
 import functionalj.types.Struct;
 import javaelmexample.server.Server;
+import javaelmexample.server.WithDemoMode;
 import javaelmexample.services.Person;
 import javaelmexample.services.PersonService;
 
@@ -38,9 +41,15 @@ public class Main {
         
         var portNumber  = determinePortNumber(args);
         var openBrowser = streamOf(args).containsNoneOf("--browser=false");
+        var demoMode    = streamOf(args).containsAnyOf ("--demo=true");
         
         var services = mapOf("persons", loadPersonService("data/persons.json"));
         var server   = new Server(portNumber, services);
+        var timer    = new Timer();
+        
+        if (demoMode) {
+            setupDemoMode(services, timer);
+        }
         
         var isStarted = server.start();
         if (isStarted) {
@@ -60,13 +69,23 @@ public class Main {
         }
         
         System.out.println("Shutting down the server ...");
+        timer.cancel();
         server.stop(() -> System.out.println("Server is successfully stopped."));
+    }
+
+    private static void setupDemoMode(ImmutableFuncMap<String, PersonService> services, Timer timer) {
+        services
+        .values()
+        .filter (WithDemoMode.class)
+        .map    (WithDemoMode.class::cast)
+        .peek   (service -> service.takeSnapshot())
+        .forEach(service -> timer.schedule(timerTask(service::resetToSnapshot), 0L, 5*60*60*1000L));
     }
     
     private static void displayHelpMessage(String[] args) {
         var askForHelp      = streamOf(args).containsAnyOf("--help");
         var unknownArgument = streamOf(args)
-                        .excludeAny("--help", "--browser=false", "--browser=true")
+                        .excludeAny("--help", "--browser=false", "--browser=true", "--demo=false", "--demo=true")
                         .exclude(Access.$S.thatStartsWith("--port"))
                         .findAny();
         unknownArgument.ifPresent(argument -> {
@@ -75,12 +94,11 @@ public class Main {
         });
         
         if (askForHelp || unknownArgument.isPresent()) {
-            var version = determineVersion();
             System.out.println("Run a simple web server.");
-            System.out.println("Version: " + version.orElse("<unknown>"));
             System.out.println("Paramerers: ");
             System.out.println("    --help               : print this message.");
             System.out.println("    --browser=false      : disable the attempt to open a browser.");
+            System.out.println("    --demo=false         : demo mode -- data is reset every 5 mins.");
             System.out.println("    --port=<port-number> : specify the port number -- default to 8081.");
             
             var code = askForHelp ? 0 : 1;
@@ -94,28 +112,6 @@ public class Main {
                 .mapToInt ($S.replaceFirst("--port=", "").parseInteger().get())
                 .findFirst()
                 .orElse   (8081);
-    }
-    
-    private static Optional<String> determineVersion() {
-        String pomContent = null;
-        try {
-            var resourceAsStream 
-                    = Main.class.getClassLoader()
-                    .getResourceAsStream("META-INF/maven/nawaman/JavaElmExample/pom.xml");
-            var buffer = new ByteArrayOutputStream();
-            resourceAsStream.transferTo(buffer);
-            pomContent = new String(buffer.toByteArray());
-        } catch (NullPointerException | IOException e) {
-            return Optional.empty();
-        }
-        
-        return streamOf (pomContent)
-                .map    ($S.split("\n"))
-                .flatMap(List::stream)
-                .mapTwo ()
-                .filter (pair -> pair.first().contains("<name>JavaElmExample</name>"))
-                .map    (pair -> pair.second().trim().replaceAll("^(.*>)(.+)(</.*)$", "$2"))
-                .findFirst();
     }
     
     private static boolean attemptOpenBrowser(String url) {
@@ -202,6 +198,16 @@ public class Main {
         }
         
         return service;
+    }
+    
+    static TimerTask timerTask(Runnable action) {
+        return new TimerTask() {
+            
+            @Override
+            public void run() {
+                action.run();
+            }
+        };
     }
     
 }

@@ -18,19 +18,18 @@ function usage {
     println "${BLD}  -p <port> ${CLR} specify the port number to <port>. Defaulted to 8080."
 }
 
-function build { ./build.sh ; }
-function run   { java -jar target/JavaElmExample.jar --port=$PORT ; }
-
 #== START ==
 
 BUILD=true
 OPEN=true
+DEMO=false
 PORT=$DEFAULT_PORT
 
-while getopts ":hBOp:" OPT; do
+while getopts ":hBOdp:" OPT; do
   case ${OPT} in
     B) BUILD=false ;;
     O) OPEN=false ;;
+    d) DEMO=true ;;
     p) PORT="$OPTARG" ;;
     h)
       show "# Display the usage"
@@ -54,11 +53,11 @@ while getopts ":hBOp:" OPT; do
   esac
 done
 
+
 ( $BUILD ) && \
     show "# Start building the application ...." && \
-    build
+    ./build.sh
+
 
 show "# Starting the application ...."
-java -jar target/JavaElmExample.jar --browser="$OPEN" --port=$PORT
-echo $! > app.pid
-
+java -jar target/JavaElmExample.jar --browser="$OPEN" --port=$PORT --demo=$DEMO
