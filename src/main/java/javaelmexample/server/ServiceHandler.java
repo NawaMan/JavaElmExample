@@ -75,7 +75,8 @@ public class ServiceHandler<DATA extends RestData> {
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {
-            response.withError(404, exception);
+            response.withError(500, exception);
+            exception.printStackTrace();
             return true;
         }
         methodNotSupported(method, paths, response);

@@ -6380,8 +6380,8 @@ var $author$project$Main$addPerson = function (person) {
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$changeField = F4(
-	function (model, firstName, lastName, nickName) {
+var $author$project$Main$changeField = F5(
+	function (model, firstName, lastName, nickName, capeColor) {
 		if (model.$ === 'Display') {
 			var data = model.a;
 			return _Utils_Tuple2(
@@ -6399,7 +6399,18 @@ var $author$project$Main$changeField = F4(
 									$elm$core$Maybe$withDefault,
 									A2($elm$core$Maybe$withDefault, '', data.person.nickName),
 									nickName)),
-							$author$project$Cape$None),
+							function () {
+								if (capeColor.$ === 'Nothing') {
+									return $author$project$Cape$None;
+								} else {
+									if (capeColor.a === '') {
+										return $author$project$Cape$None;
+									} else {
+										var color = capeColor.a;
+										return $author$project$Cape$Color(color);
+									}
+								}
+							}()),
 						data.mode)),
 				$elm$core$Platform$Cmd$none);
 		} else {
@@ -6537,33 +6548,48 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'EditFirstName':
 				var firstName = msg.a;
-				return A4(
+				return A5(
 					$author$project$Main$changeField,
 					model,
 					$elm$core$Maybe$Just(firstName),
 					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Nothing);
 			case 'EditLastName':
 				var lastName = msg.a;
-				return A4(
+				return A5(
 					$author$project$Main$changeField,
 					model,
 					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Just(lastName),
+					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Nothing);
-			default:
+			case 'EditNickName':
 				var nickName = msg.a;
-				return A4(
+				return A5(
 					$author$project$Main$changeField,
 					model,
 					$elm$core$Maybe$Nothing,
 					$elm$core$Maybe$Nothing,
-					$elm$core$Maybe$Just(nickName));
+					$elm$core$Maybe$Just(nickName),
+					$elm$core$Maybe$Nothing);
+			default:
+				var capeColor = msg.a;
+				return A5(
+					$author$project$Main$changeField,
+					model,
+					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Just(capeColor));
 		}
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Main$ChangePerson = function (a) {
 	return {$: 'ChangePerson', a: a};
+};
+var $author$project$Main$EditCapeColor = function (a) {
+	return {$: 'EditCapeColor', a: a};
 };
 var $author$project$Main$EditFirstName = function (a) {
 	return {$: 'EditFirstName', a: a};
@@ -6642,6 +6668,15 @@ var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$editPerson = function (data) {
 	var person = data.person;
+	var personCape = function () {
+		var _v0 = person.cape;
+		if (_v0.$ === 'Color') {
+			var color = _v0.a;
+			return color;
+		} else {
+			return '';
+		}
+	}();
 	var personId = A2($elm$core$Maybe$withDefault, '-', person.id);
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
@@ -6733,6 +6768,27 @@ var $author$project$Main$editPerson = function (data) {
 							[
 								$elm$html$Html$Attributes$value(personNickName),
 								$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
+							]),
+						_List_Nil)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Cape color')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(personCape),
+								$elm$html$Html$Events$onInput($author$project$Main$EditCapeColor)
 							]),
 						_List_Nil)
 					])),
@@ -6866,6 +6922,15 @@ var $author$project$Main$ToListing = function (a) {
 };
 var $author$project$Main$newPerson = function (data) {
 	var person = data.person;
+	var personCape = function () {
+		var _v0 = person.cape;
+		if (_v0.$ === 'Color') {
+			var color = _v0.a;
+			return color;
+		} else {
+			return '';
+		}
+	}();
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
 		$elm$html$Html$div,
@@ -6942,6 +7007,27 @@ var $author$project$Main$newPerson = function (data) {
 							[
 								$elm$html$Html$Attributes$value(personNickName),
 								$elm$html$Html$Events$onInput($author$project$Main$EditNickName)
+							]),
+						_List_Nil)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Cape color')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(personCape),
+								$elm$html$Html$Events$onInput($author$project$Main$EditCapeColor)
 							]),
 						_List_Nil)
 					])),
