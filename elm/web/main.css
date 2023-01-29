@@ -1,0 +1,13 @@
+
+div.viewPerson div span,
+div.newPerson  div span,
+div.editPerson div span {
+    display: inline-block;
+    width: 7em;
+}
+
+div.viewPerson div span::after,
+div.newPerson  div span::after,
+div.editPerson div span::after {
+    content: ":";
+}
