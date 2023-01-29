@@ -18,7 +18,7 @@ function usage {
     println "${BLD}  -p <port> ${CLR} specify the port number to <port>. Defaulted to 8080."
 }
 
-function build { mvn clean install package -DskipTest ; }
+function build { ./build.sh ; }
 function run   { java -jar target/JavaElmExample.jar --port=$PORT ; }
 
 #== START ==
@@ -60,3 +60,5 @@ done
 
 show "# Starting the application ...."
 java -jar target/JavaElmExample.jar --browser="$OPEN" --port=$PORT
+echo $! > app.pid
+
