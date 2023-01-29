@@ -48,6 +48,7 @@ public class Main {
         var timer    = new Timer();
         
         if (demoMode) {
+            System.out.println("Setup the demo mode ...");
             setupDemoMode(services, timer);
         }
         
@@ -79,7 +80,7 @@ public class Main {
         .filter (WithDemoMode.class)
         .map    (WithDemoMode.class::cast)
         .peek   (service -> service.takeSnapshot())
-        .forEach(service -> timer.schedule(timerTask(service::resetToSnapshot), 0L, 5*60*60*1000L));
+        .forEach(service -> timer.schedule(timerTask(service::resetToSnapshot), 0L, 5*60*1000L));
     }
     
     private static void displayHelpMessage(String[] args) {
