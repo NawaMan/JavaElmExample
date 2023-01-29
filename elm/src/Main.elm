@@ -7,6 +7,7 @@ import Html.Events exposing (..)
 import Person exposing (..)
 import Http exposing (..)
 import Maybe exposing (..)
+import Cape exposing (Cape(..))
 
 main : Program () Model Msg
 main = Browser.element { 
@@ -45,7 +46,7 @@ type Msg
   | EditNickName  String
 
 emptyPerson : Person
-emptyPerson = Person Nothing "" "" Nothing
+emptyPerson = Person Nothing "" "" Nothing None
 
 init : () -> (Model, Cmd Msg)
 init _ = (Loading, loadPersons)
@@ -63,6 +64,7 @@ changeField model firstName lastName nickName =
                     (firstName |> withDefault data.person.firstName) 
                     (lastName  |> withDefault data.person.lastName) 
                     (Just (nickName |> withDefault (data.person.nickName |> withDefault "")))
+                    None
                   )
                   data.mode
                 )
@@ -149,12 +151,16 @@ viewPerson data =
   let person = data.person
       personId = person.id |> withDefault "-"
       personNickName = person.nickName |> withDefault ""
+      personCape     = case person.cape of
+                        Color color -> color
+                        None        -> "no-cape"
   in  div [ class "viewPerson" ]
       [ h2  [] [ text "Person" ]
       , div [] [ span [] [text "ID"],         text personId]
       , div [] [ span [] [text "First name"], text person.firstName ]
       , div [] [ span [] [text "Last name"],  text person.lastName  ]
       , div [] [ span [] [text "Nick name"],  text personNickName ]
+      , div [] [ span [] [text "Cape color"], text personCape ]
       , div [] [ button [ onClick (ToEditing    data)     ] [ text "Edit" ]
                , button [ onClick (DeletePerson personId) ] [ text "Delete" ]
                , button [ onClick (ToListing    data)     ] [ text "Cancel" ]
@@ -209,7 +215,7 @@ loadPerson id = get {
 addPerson : Person -> (Cmd Msg)
 addPerson person = post {
     url    = "/api/persons/",
-    body   = jsonBody (personEncoder (Person Nothing person.firstName person.lastName person.nickName)),
+    body   = jsonBody (personEncoder (Person Nothing person.firstName person.lastName person.nickName person.cape)),
     expect = expectWhatever (\_ -> Reloaded)
   }
 

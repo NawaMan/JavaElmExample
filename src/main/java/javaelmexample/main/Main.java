@@ -1,4 +1,4 @@
-package javaelmexample.mains;
+package javaelmexample.main;
 
 import static functionalj.lens.Access.$S;
 import static functionalj.list.FuncList.ListOf;

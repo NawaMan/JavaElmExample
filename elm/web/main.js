@@ -6111,10 +6111,44 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Person$Person = F4(
-	function (id, firstName, lastName, nickName) {
-		return {firstName: firstName, id: id, lastName: lastName, nickName: nickName};
+var $author$project$Person$Person = F5(
+	function (id, firstName, lastName, nickName, cape) {
+		return {cape: cape, firstName: firstName, id: id, lastName: lastName, nickName: nickName};
 	});
+var $author$project$Cape$Color = function (a) {
+	return {$: 'Color', a: a};
+};
+var $author$project$Cape$None = {$: 'None'};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2($elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Cape$capeDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (str) {
+		switch (str) {
+			case 'Color':
+				return A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'color',
+					$elm$json$Json$Decode$string,
+					$elm$json$Json$Decode$succeed($author$project$Cape$Color));
+			case 'None':
+				return $elm$json$Json$Decode$succeed($author$project$Cape$None);
+			default:
+				var somethingElse = str;
+				return $elm$json$Json$Decode$fail('Unknown tagged: ' + somethingElse);
+		}
+	},
+	A2($elm$json$Json$Decode$field, '__tagged', $elm$json$Json$Decode$string));
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
 	return $elm$json$Json$Decode$oneOf(
@@ -6124,11 +6158,7 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$json$Json$Decode$null = _Json_decodeNull;
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder = F3(
@@ -6174,33 +6204,29 @@ var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional = F4(
 				fallback),
 			decoder);
 	});
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
-	function (key, valDecoder, decoder) {
-		return A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2($elm$json$Json$Decode$field, key, valDecoder),
-			decoder);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Person$personDecoder = A4(
-	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-	'nickName',
-	$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
-	$elm$core$Maybe$Nothing,
-	A3(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'lastName',
-		$elm$json$Json$Decode$string,
+var $author$project$Person$personDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'cape',
+	$author$project$Cape$capeDecoder,
+	A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'nickName',
+		$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
+		$elm$core$Maybe$Nothing,
 		A3(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-			'firstName',
+			'lastName',
 			$elm$json$Json$Decode$string,
-			A4(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'id',
-				$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
-				$elm$core$Maybe$Nothing,
-				$elm$json$Json$Decode$succeed($author$project$Person$Person)))));
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'firstName',
+				$elm$json$Json$Decode$string,
+				A4(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'id',
+					$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string),
+					$elm$core$Maybe$Nothing,
+					$elm$json$Json$Decode$succeed($author$project$Person$Person))))));
 var $author$project$Person$personListDecoder = $elm$json$Json$Decode$list($author$project$Person$personDecoder);
 var $author$project$Main$loadPersons = $elm$http$Http$get(
 	{
@@ -6251,17 +6277,6 @@ var $elm$http$Http$jsonBody = function (value) {
 		'application/json',
 		A2($elm$json$Json$Encode$encode, 0, value));
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -6276,6 +6291,40 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			pairs));
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Cape$capeEncoder = function (cape) {
+	if (cape.$ === 'Color') {
+		var color = cape.a;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'__tagged',
+					$elm$json$Json$Encode$string('Color')),
+					_Utils_Tuple2(
+					'color',
+					$elm$json$Json$Encode$string(color))
+				]));
+	} else {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'__tagged',
+					$elm$json$Json$Encode$string('None'))
+				]));
+	}
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -6306,7 +6355,10 @@ var $author$project$Person$personEncoder = function (person) {
 				A2(
 					$elm$core$Maybe$withDefault,
 					$elm$json$Json$Encode$null,
-					A2($elm$core$Maybe$map, $elm$json$Json$Encode$string, person.nickName)))
+					A2($elm$core$Maybe$map, $elm$json$Json$Encode$string, person.nickName))),
+				_Utils_Tuple2(
+				'cape',
+				$author$project$Cape$capeEncoder(person.cape))
 			]));
 };
 var $elm$http$Http$post = function (r) {
@@ -6318,7 +6370,7 @@ var $author$project$Main$addPerson = function (person) {
 		{
 			body: $elm$http$Http$jsonBody(
 				$author$project$Person$personEncoder(
-					A4($author$project$Person$Person, $elm$core$Maybe$Nothing, person.firstName, person.lastName, person.nickName))),
+					A5($author$project$Person$Person, $elm$core$Maybe$Nothing, person.firstName, person.lastName, person.nickName, person.cape))),
 			expect: $elm$http$Http$expectWhatever(
 				function (_v0) {
 					return $author$project$Main$Reloaded;
@@ -6337,7 +6389,7 @@ var $author$project$Main$changeField = F4(
 					A3(
 						$author$project$Main$Data,
 						data.persons,
-						A4(
+						A5(
 							$author$project$Person$Person,
 							data.person.id,
 							A2($elm$core$Maybe$withDefault, data.person.firstName, firstName),
@@ -6346,7 +6398,8 @@ var $author$project$Main$changeField = F4(
 								A2(
 									$elm$core$Maybe$withDefault,
 									A2($elm$core$Maybe$withDefault, '', data.person.nickName),
-									nickName))),
+									nickName)),
+							$author$project$Cape$None),
 						data.mode)),
 				$elm$core$Platform$Cmd$none);
 		} else {
@@ -6389,7 +6442,7 @@ var $author$project$Main$deletePerson = function (id) {
 			url: '/api/persons/' + id
 		});
 };
-var $author$project$Main$emptyPerson = A4($author$project$Person$Person, $elm$core$Maybe$Nothing, '', '', $elm$core$Maybe$Nothing);
+var $author$project$Main$emptyPerson = A5($author$project$Person$Person, $elm$core$Maybe$Nothing, '', '', $elm$core$Maybe$Nothing, $author$project$Cape$None);
 var $author$project$Main$LoadPerson = function (a) {
 	return {$: 'LoadPerson', a: a};
 };
@@ -6927,6 +6980,15 @@ var $author$project$Main$ToEditing = function (a) {
 };
 var $author$project$Main$viewPerson = function (data) {
 	var person = data.person;
+	var personCape = function () {
+		var _v0 = person.cape;
+		if (_v0.$ === 'Color') {
+			var color = _v0.a;
+			return color;
+		} else {
+			return 'no-cape';
+		}
+	}();
 	var personId = A2($elm$core$Maybe$withDefault, '-', person.id);
 	var personNickName = A2($elm$core$Maybe$withDefault, '', person.nickName);
 	return A2(
@@ -6999,6 +7061,20 @@ var $author$project$Main$viewPerson = function (data) {
 								$elm$html$Html$text('Nick name')
 							])),
 						$elm$html$Html$text(personNickName)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Cape color')
+							])),
+						$elm$html$Html$text(personCape)
 					])),
 				A2(
 				$elm$html$Html$div,

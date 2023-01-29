@@ -1,7 +1,7 @@
 [
-    { "id": "1", "firstName": "Clark", "lastName": "Kent",   "nickName": "Superman" },
-    { "id": "2", "firstName": "Bruce", "lastName": "Wayne",  "nickName": "Batman" },
-    { "id": "3", "firstName": "Diana", "lastName": "Prince", "nickName": "Wonder Woman" },
-    { "id": "4", "firstName": "Tony",  "lastName": "Stark",  "nickName": "Iron Man" },
-    { "id": "5", "firstName": "Bruce", "lastName": "Banner", "nickName": "Hulk" }
+    { "id": "1", "firstName": "Clark", "lastName": "Kent",   "nickName": "Superman",     "cape": { "color": "Red",   "__tagged": "Color" }},
+    { "id": "2", "firstName": "Bruce", "lastName": "Wayne",  "nickName": "Batman",       "cape": { "color": "Black", "__tagged": "Color" } },
+    { "id": "3", "firstName": "Diana", "lastName": "Prince", "nickName": "Wonder Woman", "cape": { "__tagged": "None" } },
+    { "id": "4", "firstName": "Tony",  "lastName": "Stark",  "nickName": "Iron Man",     "cape": { "__tagged": "None" } },
+    { "id": "5", "firstName": "Bruce", "lastName": "Banner", "nickName": "Hulk",         "cape": { "__tagged": "None" } }
 ]

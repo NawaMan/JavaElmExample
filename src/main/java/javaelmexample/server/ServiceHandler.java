@@ -12,7 +12,7 @@ import functionalj.list.FuncList;
 public class ServiceHandler<DATA extends RestData> { 
     
     private final RestService<DATA> service;
-    private final Http       http;
+    private final Http              http;
     
     public ServiceHandler(RestService<DATA> service) {
         this.service = service;
