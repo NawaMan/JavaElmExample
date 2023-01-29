@@ -7,14 +7,24 @@ import static java.util.Collections.unmodifiableMap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.sun.net.httpserver.HttpExchange;
 
 import functionalj.promise.Promise;
 import functionalj.result.Result;
+import functionalj.types.IData;
 import functionalj.types.Struct;
 
 /**
@@ -22,7 +32,28 @@ import functionalj.types.Struct;
  */
 public class Http {
     
-    private static final ThreadLocal<Gson> gson = ThreadLocal.withInitial(() -> new Gson());
+    private static final ThreadLocal<Gson> gson 
+                    = ThreadLocal.withInitial(() -> 
+                        new GsonBuilder()
+                        .registerTypeAdapter(IData.class, new IDataGsonAdaptor())
+                        .create());
+    
+    private static class IDataGsonAdaptor implements JsonSerializer<IData>, JsonDeserializer<IData> {
+        @Override
+        public JsonElement serialize(IData src, Type typeOfSrc, JsonSerializationContext context) {
+            var map     = src.__toMap();
+            var element = context.serialize(map);
+            return element;
+        }
+        @SuppressWarnings({ "unchecked" })
+        @Override
+        public IData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            var map = context.deserialize(json, Map.class);
+            var data = IData.fromMap((Map<String, Object>)map, (Class<IData>)typeOfT).get();
+            return data;
+        }
+    }
     
     public static final int timeout = 30;
     
@@ -49,7 +80,7 @@ public class Http {
         }
     }
     
-    @Struct
+    @Struct(specField = "__spec")
     static interface ResponseSpec {
         
         HttpExchange exchange();
@@ -132,7 +163,16 @@ public class Http {
         return gson.get().fromJson(json, clss);
     }
     
+    @SuppressWarnings("unchecked")
     private static <T> String toJson(T object) {
+        if (object instanceof IData) {
+            var map = ((IData)object).__toMap();
+            return gson.get().toJson(map);
+        }
+        if (object instanceof List) {
+            var list = IData.toMap((List<IData>)object);
+            return gson.get().toJson(list);
+        }
         return gson.get().toJson(object);
     }
     

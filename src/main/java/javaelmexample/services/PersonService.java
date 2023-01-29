@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import functionalj.list.FuncList;
 import functionalj.promise.Promise;
 import functionalj.stream.StreamPlus;
+import functionalj.types.Choice;
 import functionalj.types.Nullable;
 import functionalj.types.Required;
 import functionalj.types.Struct;
@@ -29,6 +30,14 @@ public class PersonService implements RestService<Person> {
         @Required String firstName();
         @Required String lastName();
         @Nullable String nickName();
+        @Required Cape   cape();
+    }
+    
+    @Choice
+    @Elm(baseModule = "", generatedDirectory = "elm/src/")
+    static interface CapeModel {
+        void Color(String color);
+        void None();
     }
     
     
