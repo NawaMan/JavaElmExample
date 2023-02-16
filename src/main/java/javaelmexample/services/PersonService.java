@@ -25,7 +25,8 @@ import javaelmexample.server.WithDemoMode;
  **/
 public class PersonService implements RestService<Person>, WithDemoMode {
     
-    @Struct @Elm(baseModule = "", generatedDirectory = "elm/src/")
+    @Struct
+    @Elm(baseModule = "", generatedDirectory = "elm/src/")
     static interface PersonModel extends RestData {
         @Nullable String id();
         @Required String firstName();
