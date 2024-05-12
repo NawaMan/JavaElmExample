@@ -1,5 +1,5 @@
-compile = "javac -classpath .:target/dependency/* -d . $(find . -type f -name '*.java')"
-run = "java -classpath .:target/dependency/* Main"
+compile = "./build.sh"
+run = "./run.sh -BO"
 entrypoint = "Main.java"
 hidden = ["**/*.class"]
 
@@ -57,3 +57,7 @@ type = "request"
 [debugger.interactive.launchMessage.arguments]
 classPaths = ["."]
 mainClass = "Main"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
