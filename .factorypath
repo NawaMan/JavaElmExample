@@ -1,7 +1,10 @@
 <factorypath>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/nullablej/nullablej/4.1.0/nullablej-4.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/defaultj/defaultj-annotations/2.3.1/defaultj-annotations-2.3.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-types/1.0.17/functionalj-types-1.0.17.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-elm/1.0.17/functionalj-elm-1.0.17.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-store/1.0.17/functionalj-store-1.0.17.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-all/0.5.8.0/functionalj-all-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/nullablej/nullablej/4.0.1.0/nullablej-4.0.1.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-core/0.5.8.0/functionalj-core-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/defaultj/defaultj-api/2.0.0.0/defaultj-api-2.0.0.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-types/0.5.8.0/functionalj-types-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-store/0.5.8.0/functionalj-store-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-elm/0.5.8.0/functionalj-elm-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/gson/gson/2.8.7/gson-2.8.7.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
