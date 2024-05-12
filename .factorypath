@@ -1,3 +1,7 @@
 <factorypath>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-types/0.5.8.0/functionalj-types-0.5.8.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/nullablej/nullablej/4.1.0/nullablej-4.1.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/defaultj/defaultj-annotations/2.3.1/defaultj-annotations-2.3.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-types/1.0.17/functionalj-types-1.0.17.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-elm/1.0.17/functionalj-elm-1.0.17.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/functionalj/functionalj-store/1.0.17/functionalj-store-1.0.17.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
