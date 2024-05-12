@@ -18,7 +18,6 @@ import functionalj.types.Struct;
 import functionalj.types.elm.Elm;
 import javaelmexample.server.RestData;
 import javaelmexample.server.RestService;
-import javaelmexample.server.WithDemoMode;
 
 /**
  * This is an example Rest service that deal with a Person objects.

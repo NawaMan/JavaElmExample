@@ -24,9 +24,9 @@ import functionalj.list.FuncList;
 import functionalj.map.ImmutableFuncMap;
 import functionalj.types.Struct;
 import javaelmexample.server.Server;
-import javaelmexample.server.WithDemoMode;
 import javaelmexample.services.Person;
 import javaelmexample.services.PersonService;
+import javaelmexample.services.WithDemoMode;
 
 /**
  * This main create a web service exposing to the port (specify using `--port=<port-number>`, default to 8081).

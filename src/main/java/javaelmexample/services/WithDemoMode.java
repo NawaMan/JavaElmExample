@@ -1,4 +1,4 @@
-package javaelmexample.server;
+package javaelmexample.services;
 
 /**
  * Service that support Demo mode which is the ability to save its value and reset it.
