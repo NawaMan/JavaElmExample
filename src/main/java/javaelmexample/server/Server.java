@@ -63,15 +63,7 @@ public class Server {
         httpServer.start();
         
         f(()-> {
-            try {
-                latch.await();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            } finally {
-                stillRunning.set(false);
-                shutdown(httpServer);
-                executor.shutdown();
-            }
+            latch.await();
         })
         .async()
         .onComplete(result -> {
@@ -79,6 +71,9 @@ public class Server {
                 exception.printStackTrace();
                 stop();
             });
+            stillRunning.set(false);
+            shutdown(httpServer);
+            executor.shutdown();
         })
         .start();
         
